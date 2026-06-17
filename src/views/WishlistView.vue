@@ -74,8 +74,13 @@ function submitForm() {
   dialogMode.value = 'view'
 }
 
-function handleTransfer(item?: WishlistItem) {
-  const target = item ?? selectedItem.value
+function handleTransfer(item?: WishlistItem | Event) {
+  let target: WishlistItem | null | undefined
+  if (item && 'id' in item) {
+    target = item
+  } else {
+    target = selectedItem.value
+  }
   if (!target) return
 
   confirm.require({

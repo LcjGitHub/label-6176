@@ -2,20 +2,24 @@
 import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useCollectionStore } from '@/stores/collection'
+import { useBorrowStore } from '@/stores/borrow'
 import { filterBySource, searchAlbums } from '@/utils/search'
 import type { Album, AlbumSource, FilterType, PersonalAlbumForm } from '@/types/album'
+import type { BorrowForm, BorrowRecord } from '@/types/borrow'
 import DataView from 'primevue/dataview'
 import SelectButton from 'primevue/selectbutton'
 import InputText from 'primevue/inputtext'
 import Button from 'primevue/button'
 import Dialog from 'primevue/dialog'
 import InputNumber from 'primevue/inputnumber'
+import Calendar from 'primevue/calendar'
 import Tag from 'primevue/tag'
 import ConfirmDialog from 'primevue/confirmdialog'
 import { useConfirm } from 'primevue/useconfirm'
 import AlbumCover from '@/components/AlbumCover.vue'
 
 const store = useCollectionStore()
+const borrowStore = useBorrowStore()
 const router = useRouter()
 const confirm = useConfirm()
 
@@ -57,6 +61,97 @@ const dialogHeader = computed(() => {
 
 const isPersonal = computed(() => selectedAlbum.value?.source === 'personal')
 const isFormMode = computed(() => dialogMode.value === 'create' || dialogMode.value === 'edit')
+
+const activeBorrowRecord = computed((): BorrowRecord | undefined => {
+  if (!selectedAlbum.value) return undefined
+  return borrowStore.getActiveByAlbumId(selectedAlbum.value.id)
+})
+
+const canBorrow = computed(() => {
+  if (!selectedAlbum.value) return false
+  return isPersonal.value && borrowStore.isAlbumAvailable(selectedAlbum.value.id)
+})
+
+const borrowDialogVisible = ref(false)
+
+const borrowDateRef = ref<Date>(new Date())
+const expectedReturnDateRef = ref<Date>(new Date(Date.now() + 7 * 24 * 60 * 60 * 1000))
+
+const emptyBorrowForm = (): BorrowForm => {
+  const today = new Date()
+  const nextWeek = new Date(today.getTime() + 7 * 24 * 60 * 60 * 1000)
+  return {
+    borrowerName: '',
+    borrowDate: today.toISOString().split('T')[0],
+    expectedReturnDate: nextWeek.toISOString().split('T')[0],
+  }
+}
+
+const borrowForm = ref<BorrowForm>(emptyBorrowForm())
+
+function dateToStr(date: Date): string {
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const day = String(date.getDate()).padStart(2, '0')
+  return `${year}-${month}-${day}`
+}
+
+const isBorrowFormValid = computed(() => {
+  return (
+    borrowForm.value.borrowerName.trim() !== '' &&
+    borrowForm.value.borrowDate !== '' &&
+    borrowForm.value.expectedReturnDate !== '' &&
+    new Date(borrowForm.value.expectedReturnDate) >= new Date(borrowForm.value.borrowDate)
+  )
+})
+
+function openBorrowDialog() {
+  if (!selectedAlbum.value || !isPersonal.value) return
+  const today = new Date()
+  const nextWeek = new Date(today.getTime() + 7 * 24 * 60 * 60 * 1000)
+  borrowDateRef.value = today
+  expectedReturnDateRef.value = nextWeek
+  borrowForm.value = {
+    borrowerName: '',
+    borrowDate: dateToStr(today),
+    expectedReturnDate: dateToStr(nextWeek),
+  }
+  borrowDialogVisible.value = true
+}
+
+function onBorrowDateChange(e: any) {
+  if (e.value) {
+    borrowForm.value.borrowDate = dateToStr(e.value)
+  }
+}
+
+function onReturnDateChange(e: any) {
+  if (e.value) {
+    borrowForm.value.expectedReturnDate = dateToStr(e.value)
+  }
+}
+
+function submitBorrow() {
+  if (!isBorrowFormValid.value || !selectedAlbum.value) return
+  borrowStore.createBorrow(selectedAlbum.value, borrowForm.value)
+  borrowDialogVisible.value = false
+}
+
+function formatDate(dateStr: string) {
+  return new Date(dateStr).toLocaleDateString('zh-CN')
+}
+
+function borrowStatusSeverity(status: string) {
+  if (status === 'overdue') return 'danger'
+  if (status === 'borrowed') return 'warning'
+  return 'success'
+}
+
+function borrowStatusLabel(status: string) {
+  if (status === 'overdue') return '已逾期'
+  if (status === 'borrowed') return '借出中'
+  return '已归还'
+}
 
 const isFormValid = computed(() => {
   return (
@@ -168,7 +263,16 @@ function formatPrice(price?: number) {
       </div>
       <div class="header-actions">
         <Button label="心愿单" icon="pi pi-heart" severity="help" outlined @click="router.push('/wishlist')" />
-        <Button label="统计" icon="pi pi-chart-bar" severity="secondary" @click="router.push('/stats')" />
+        <Button label="统计" icon="pi pi-chart-bar" severity="secondary" outlined @click="router.push('/stats')" />
+        <div class="borrow-btn-wrapper">
+          <Button
+            label="在借列表"
+            icon="pi pi-book"
+            severity="warning"
+            @click="router.push('/borrow')"
+          />
+          <span v-if="borrowStore.activeCount > 0" class="borrow-badge">{{ borrowStore.activeCount }}</span>
+        </div>
         <Button label="添加收藏" icon="pi pi-plus" @click="openCreate" />
       </div>
     </header>
@@ -265,6 +369,21 @@ function formatPrice(price?: number) {
                 :severity="sourceSeverity(selectedAlbum.source)"
               />
             </dd>
+            <template v-if="isPersonal && activeBorrowRecord">
+              <dt>借阅状态</dt>
+              <dd>
+                <Tag
+                  :value="borrowStatusLabel(activeBorrowRecord.status)"
+                  :severity="borrowStatusSeverity(activeBorrowRecord.status)"
+                />
+              </dd>
+              <dt>借阅人</dt>
+              <dd>{{ activeBorrowRecord.borrowerName }}</dd>
+              <dt>借出日期</dt>
+              <dd>{{ formatDate(activeBorrowRecord.borrowDate) }}</dd>
+              <dt>预计归还</dt>
+              <dd>{{ formatDate(activeBorrowRecord.expectedReturnDate) }}</dd>
+            </template>
           </dl>
         </div>
       </template>
@@ -317,9 +436,18 @@ function formatPrice(price?: number) {
             v-if="isPersonal"
             label="编辑"
             icon="pi pi-pencil"
+            severity="secondary"
+            outlined
             @click="openEdit"
           />
-          <Button label="关闭" severity="secondary" @click="dialogVisible = false" />
+          <Button
+            v-if="canBorrow"
+            label="发起借阅"
+            icon="pi pi-book"
+            severity="warning"
+            @click="openBorrowDialog"
+          />
+          <Button label="关闭" @click="dialogVisible = false" />
         </template>
         <template v-else>
           <Button
@@ -335,6 +463,74 @@ function formatPrice(price?: number) {
             @click="submitForm"
           />
         </template>
+      </template>
+    </Dialog>
+
+    <Dialog
+      v-model:visible="borrowDialogVisible"
+      header="发起借阅"
+      modal
+      :style="{ width: '28rem' }"
+      :breakpoints="{ '640px': '95vw' }"
+    >
+      <div class="borrow-form">
+        <div v-if="selectedAlbum" class="borrow-album-info">
+          <AlbumCover :title="selectedAlbum.title" class="borrow-cover" />
+          <div class="borrow-album-text">
+            <p class="borrow-album-title">{{ selectedAlbum.title }}</p>
+            <p class="borrow-album-artist">{{ selectedAlbum.artist }}</p>
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="borrower-name">借阅人姓名 <span class="required">*</span></label>
+          <InputText
+            id="borrower-name"
+            v-model="borrowForm.borrowerName"
+            placeholder="请输入借阅人姓名"
+            class="w-full"
+          />
+        </div>
+
+        <div class="field">
+          <label for="borrow-date">借出日期 <span class="required">*</span></label>
+          <Calendar
+            id="borrow-date"
+            v-model="borrowDateRef"
+            dateFormat="yy-mm-dd"
+            :showIcon="true"
+            class="w-full"
+            @change="onBorrowDateChange"
+          />
+        </div>
+
+        <div class="field">
+          <label for="return-date">预计归还日期 <span class="required">*</span></label>
+          <Calendar
+            id="return-date"
+            v-model="expectedReturnDateRef"
+            dateFormat="yy-mm-dd"
+            :showIcon="true"
+            :minDate="borrowDateRef"
+            class="w-full"
+            @change="onReturnDateChange"
+          />
+        </div>
+      </div>
+
+      <template #footer>
+        <Button
+          label="取消"
+          severity="secondary"
+          outlined
+          @click="borrowDialogVisible = false"
+        />
+        <Button
+          label="确认借阅"
+          icon="pi pi-check"
+          :disabled="!isBorrowFormValid"
+          @click="submitBorrow"
+        />
       </template>
     </Dialog>
 
@@ -507,6 +703,73 @@ function formatPrice(price?: number) {
 
 .w-full {
   width: 100%;
+}
+
+.borrow-btn-wrapper {
+  position: relative;
+  display: inline-flex;
+}
+
+.borrow-badge {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.25rem;
+  height: 1.25rem;
+  padding: 0 0.375rem;
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #fff;
+  background: var(--p-red-500);
+  border-radius: 999px;
+  z-index: 1;
+}
+
+.borrow-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.borrow-album-info {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  background: var(--p-surface-50);
+  border-radius: var(--p-border-radius);
+}
+
+.borrow-cover {
+  width: 64px;
+  height: 64px;
+  flex-shrink: 0;
+}
+
+.borrow-album-text {
+  min-width: 0;
+  flex: 1;
+}
+
+.borrow-album-title {
+  margin: 0 0 0.25rem;
+  font-weight: 600;
+  font-size: 0.95rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.borrow-album-artist {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--p-text-muted-color);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 @media (max-width: 640px) {

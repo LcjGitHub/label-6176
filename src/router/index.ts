@@ -18,6 +18,11 @@ const router = createRouter({
       name: 'wishlist',
       component: () => import('@/views/WishlistView.vue'),
     },
+    {
+      path: '/borrow',
+      name: 'borrow',
+      component: () => import('@/views/BorrowView.vue'),
+    },
   ],
 })
 
