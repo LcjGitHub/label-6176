@@ -1,0 +1,202 @@
+{
+  "species": [
+    {
+      "id": "sp-01",
+      "name": "白鹭",
+      "scientificName": "Ardea alba",
+      "imageUrl": "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=elegant%20white%20egret%20bird%20standing%20in%20shallow%20water%20nature%20photography&image_size=landscape_16_9"
+    },
+    {
+      "id": "sp-02",
+      "name": "红嘴蓝鹊",
+      "scientificName": "Urocissa erythroryncha",
+      "imageUrl": "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=red-billed%20blue%20magpie%20bird%20on%20branch%20nature%20photography&image_size=landscape_16_9"
+    },
+    {
+      "id": "sp-03",
+      "name": "翠鸟",
+      "scientificName": "Alcedo atthis",
+      "imageUrl": "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=common%20kingfisher%20bird%20perched%20on%20reed%20nature%20photography&image_size=landscape_16_9"
+    },
+    {
+      "id": "sp-04",
+      "name": "喜鹊",
+      "scientificName": "Pica pica",
+      "imageUrl": "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=black%20and%20white%20magpie%20bird%20in%20flight%20nature%20photography&image_size=landscape_16_9"
+    },
+    {
+      "id": "sp-05",
+      "name": "戴胜",
+      "scientificName": "Upupa epops",
+      "imageUrl": "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=hoopoe%20bird%20with%20crest%20on%20ground%20nature%20photography&image_size=landscape_16_9"
+    },
+    {
+      "id": "sp-06",
+      "name": "鸳鸯",
+      "scientificName": "Aix galericulata",
+      "imageUrl": "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=mandarin%20duck%20pair%20on%20pond%20nature%20photography&image_size=landscape_16_9"
+    }
+  ],
+  "sightings": [
+    {
+      "id": "sig-01",
+      "speciesId": "sp-01",
+      "date": "2026-05-20",
+      "location": "西湖湿地",
+      "count": 3,
+      "notes": "在湖边浅水区觅食"
+    },
+    {
+      "id": "sig-02",
+      "speciesId": "sp-01",
+      "date": "2026-04-15",
+      "location": "鄱阳湖保护区",
+      "count": 12,
+      "notes": "大规模迁徙群体"
+    },
+    {
+      "id": "sig-03",
+      "speciesId": "sp-01",
+      "date": "2026-03-08",
+      "location": "太湖边",
+      "count": 5,
+      "notes": "与苍鹭混群"
+    },
+    {
+      "id": "sig-04",
+      "speciesId": "sp-02",
+      "date": "2026-06-01",
+      "location": "张家界国家森林公园",
+      "count": 2,
+      "notes": "在树冠层活动"
+    },
+    {
+      "id": "sig-05",
+      "speciesId": "sp-02",
+      "date": "2026-05-10",
+      "location": "武夷山自然保护区",
+      "count": 4,
+      "notes": "叫声响亮，容易辨认"
+    },
+    {
+      "id": "sig-06",
+      "speciesId": "sp-02",
+      "date": "2026-02-22",
+      "location": "鼎湖山",
+      "count": 1,
+      "notes": "独自栖息在密林边缘"
+    },
+    {
+      "id": "sig-07",
+      "speciesId": "sp-03",
+      "date": "2026-06-10",
+      "location": "颐和园昆明湖",
+      "count": 1,
+      "notes": "在荷塘边快速俯冲捕鱼"
+    },
+    {
+      "id": "sig-08",
+      "speciesId": "sp-03",
+      "date": "2026-05-28",
+      "location": "苏州拙政园",
+      "count": 2,
+      "notes": "一对在池塘附近活动"
+    },
+    {
+      "id": "sig-09",
+      "speciesId": "sp-03",
+      "date": "2026-04-02",
+      "location": "西溪湿地",
+      "count": 3,
+      "notes": "沿水道飞行"
+    },
+    {
+      "id": "sig-10",
+      "speciesId": "sp-04",
+      "date": "2026-05-15",
+      "location": "北京故宫",
+      "count": 6,
+      "notes": "在古建筑屋脊筑巢"
+    },
+    {
+      "id": "sig-11",
+      "speciesId": "sp-04",
+      "date": "2026-03-20",
+      "location": "沈阳北陵公园",
+      "count": 4,
+      "notes": "晨间活跃"
+    },
+    {
+      "id": "sig-12",
+      "speciesId": "sp-05",
+      "date": "2026-06-05",
+      "location": "成都浣花溪公园",
+      "count": 1,
+      "notes": "在草坪上觅食昆虫"
+    },
+    {
+      "id": "sig-13",
+      "speciesId": "sp-05",
+      "date": "2026-04-18",
+      "location": "南京紫金山",
+      "count": 2,
+      "notes": "在林间空地活动"
+    },
+    {
+      "id": "sig-14",
+      "speciesId": "sp-05",
+      "date": "2026-01-10",
+      "location": "昆明翠湖",
+      "count": 3,
+      "notes": "冬季依然活跃"
+    },
+    {
+      "id": "sig-15",
+      "speciesId": "sp-06",
+      "date": "2026-05-25",
+      "location": "杭州西湖",
+      "count": 2,
+      "notes": "一对在湖心岛附近游弋"
+    },
+    {
+      "id": "sig-16",
+      "speciesId": "sp-06",
+      "date": "2026-04-10",
+      "location": "婺源鸳鸯湖",
+      "count": 20,
+      "notes": "繁殖季节群体聚集"
+    },
+    {
+      "id": "sig-17",
+      "speciesId": "sp-06",
+      "date": "2026-02-14",
+      "location": "鄱阳湖保护区",
+      "count": 8,
+      "notes": "越冬群体"
+    },
+    {
+      "id": "sig-18",
+      "speciesId": "sp-04",
+      "date": "2026-06-12",
+      "location": "西安大雁塔广场",
+      "count": 3,
+      "notes": "在草坪上觅食"
+    },
+    {
+      "id": "sig-19",
+      "speciesId": "sp-01",
+      "date": "2026-01-05",
+      "location": "崇明东滩",
+      "count": 8,
+      "notes": "越冬种群稳定"
+    },
+    {
+      "id": "sig-20",
+      "speciesId": "sp-03",
+      "date": "2026-01-20",
+      "location": "大理洱海",
+      "count": 1,
+      "notes": "在岸边礁石上停栖"
+    }
+  ]
+}

@@ -23,6 +23,11 @@ const router = createRouter({
       name: 'borrow',
       component: () => import('@/views/BorrowView.vue'),
     },
+    {
+      path: '/species/:id',
+      name: 'species-detail',
+      component: () => import('@/views/SpeciesDetailView.vue'),
+    },
   ],
 })
 
