@@ -1,6 +1,8 @@
 import Fuse, { type IFuseOptions } from 'fuse.js'
 import type { Album, FilterType, GenreFilterType, SortField, SortOrder } from '@/types/album'
 
+export type { SortField, SortOrder, FilterType, GenreFilterType }
+
 const fuseOptions: IFuseOptions<Album> = {
   keys: [
     { name: 'title', weight: 0.4 },
@@ -59,6 +61,11 @@ export function searchAlbums(albums: Album[], query: string): Album[] {
 
 /**
  * 按指定字段和方向排序专辑
+ *
+ * 排序规则说明：
+ * - title/artist: 按中文字符串本地化排序
+ * - purchasePrice: 无购入价的专辑始终排在有购入价的专辑之后，有购入价的按数值排序
+ * - year: 无年份的专辑排在最前/最后取决于方向
  */
 export function sortAlbums(albums: Album[], field: SortField, order: SortOrder): Album[] {
   const sorted = [...albums].sort((a, b) => {

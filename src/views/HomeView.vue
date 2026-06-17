@@ -1,9 +1,13 @@
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue'
+import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useCollectionStore } from '@/stores/collection'
 import { useBorrowStore } from '@/stores/borrow'
-import { filterBySource, filterByGenre, filterByStarred, searchAlbums, sortAlbums, extractUniqueGenres } from '@/utils/search'
+import {
+  useAlbumFilterPipeline,
+  createDefaultFilterState,
+  createDefaultSortOptions,
+} from '@/utils/albumFilterPipeline'
 import {
   exportCollection,
   parseImportFile,
@@ -50,64 +54,16 @@ const genreFilter = ref<GenreFilterType>('all')
 const sortOption = ref<SortOptionValue>('default')
 const starredOnly = ref(false)
 
-const filterOptions = [
-  { label: '全部', value: 'all' as FilterType },
-  { label: '示例专辑', value: 'mock' as FilterType },
-  { label: '我的收藏', value: 'personal' as FilterType },
-]
+const filterOptions = createDefaultFilterState()
+const sortOptions = createDefaultSortOptions()
 
-const sortOptions = [
-  { label: '默认排序', value: 'default' as SortOptionValue },
-  { label: '专辑名升序', value: 'title-asc' as SortOptionValue },
-  { label: '专辑名降序', value: 'title-desc' as SortOptionValue },
-  { label: '艺人升序', value: 'artist-asc' as SortOptionValue },
-  { label: '艺人降序', value: 'artist-desc' as SortOptionValue },
-  { label: '购入价升序', value: 'purchasePrice-asc' as SortOptionValue },
-  { label: '购入价降序', value: 'purchasePrice-desc' as SortOptionValue },
-  { label: '年份升序', value: 'year-asc' as SortOptionValue },
-  { label: '年份降序', value: 'year-desc' as SortOptionValue },
-]
-
-/**
- * 经过来源筛选 + 关键词搜索后的专辑列表，用于提取风格下拉选项
- * 这样风格选项只会显示当前搜索结果中存在的风格
- */
-const preGenreAlbums = computed(() => {
-  let result = filterBySource(store.allAlbums, filterType.value)
-  result = searchAlbums(result, searchQuery.value)
-  return result
-})
-
-/** 从来源筛选+搜索后的专辑中提取去重风格，生成下拉选项 */
-const genreOptions = computed(() => {
-  const uniqueGenres = extractUniqueGenres(preGenreAlbums.value)
-  const options = [{ label: '全部风格', value: 'all' as GenreFilterType }]
-  for (const genre of uniqueGenres) {
-    options.push({ label: genre, value: genre as GenreFilterType })
-  }
-  return options
-})
-
-/** 筛选、搜索并排序后的专辑列表 */
-const displayAlbums = computed(() => {
-  let result = preGenreAlbums.value
-  result = filterByGenre(result, genreFilter.value)
-  result = filterByStarred(result, starredOnly.value)
-  if (sortOption.value !== 'default') {
-    const [field, order] = sortOption.value.split('-') as [string, string]
-    result = sortAlbums(result, field as any, order as any)
-  }
-  return result
-})
-
-/**
- * 当风格选项变化时（例如切换了来源筛选），如果当前选中的风格不再可用，自动重置为"全部风格"
- */
-watch(genreOptions, (options) => {
-  const availableValues = options.map((o) => o.value)
-  if (!availableValues.includes(genreFilter.value)) {
-    genreFilter.value = 'all'
-  }
+const allAlbumsRef = computed(() => store.allAlbums)
+const { genreOptions, displayAlbums } = useAlbumFilterPipeline(allAlbumsRef, {
+  searchQuery,
+  filterType,
+  genreFilter,
+  sortOption,
+  starredOnly,
 })
 
 /** Dialog 状态 */
