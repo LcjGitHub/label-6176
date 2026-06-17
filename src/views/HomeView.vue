@@ -167,6 +167,7 @@ function formatPrice(price?: number) {
         <p>浏览示例专辑，管理你的个人黑胶收藏</p>
       </div>
       <div class="header-actions">
+        <Button label="心愿单" icon="pi pi-heart" severity="help" outlined @click="router.push('/wishlist')" />
         <Button label="统计" icon="pi pi-chart-bar" severity="secondary" @click="router.push('/stats')" />
         <Button label="添加收藏" icon="pi pi-plus" @click="openCreate" />
       </div>

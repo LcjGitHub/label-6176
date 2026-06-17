@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { useCollectionStore } from '@/stores/collection'
+import { useWishlistStore } from '@/stores/wishlist'
 import { useRouter } from 'vue-router'
 import Button from 'primevue/button'
 import Card from 'primevue/card'
@@ -8,6 +9,7 @@ import Column from 'primevue/column'
 import Tag from 'primevue/tag'
 
 const store = useCollectionStore()
+const wishlistStore = useWishlistStore()
 const router = useRouter()
 const stats = store.collectionStats
 
@@ -50,6 +52,30 @@ function goBack() {
             <div class="stat-info">
               <p class="stat-label">购入总金额</p>
               <p class="stat-value">{{ formatPrice(stats.totalAmount) }}</p>
+            </div>
+          </div>
+        </template>
+      </Card>
+
+      <Card class="stat-card">
+        <template #content>
+          <div class="stat-content">
+            <i class="pi pi-heart stat-icon" style="color: var(--p-purple-500)" />
+            <div class="stat-info">
+              <p class="stat-label">心愿单总数</p>
+              <p class="stat-value">{{ wishlistStore.totalCount }}</p>
+            </div>
+          </div>
+        </template>
+      </Card>
+
+      <Card class="stat-card">
+        <template #content>
+          <div class="stat-content">
+            <i class="pi pi-wallet stat-icon" style="color: var(--p-purple-500)" />
+            <div class="stat-info">
+              <p class="stat-label">心愿预期总金额</p>
+              <p class="stat-value">{{ formatPrice(wishlistStore.totalExpectedAmount) }}</p>
             </div>
           </div>
         </template>
