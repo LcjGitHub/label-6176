@@ -43,3 +43,20 @@ export interface MockAlbum {
  * 列表筛选类型
  */
 export type FilterType = 'all' | 'mock' | 'personal'
+
+/**
+ * 按风格分组的统计项
+ */
+export interface GenreStat {
+  genre: string
+  count: number
+}
+
+/**
+ * 收藏统计结果
+ */
+export interface CollectionStats {
+  totalCount: number
+  totalAmount: number
+  genreStats: GenreStat[]
+}

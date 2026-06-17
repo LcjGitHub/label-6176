@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
+import { useRouter } from 'vue-router'
 import { useCollectionStore } from '@/stores/collection'
 import { filterBySource, searchAlbums } from '@/utils/search'
 import type { Album, AlbumSource, FilterType, PersonalAlbumForm } from '@/types/album'
@@ -15,6 +16,7 @@ import { useConfirm } from 'primevue/useconfirm'
 import AlbumCover from '@/components/AlbumCover.vue'
 
 const store = useCollectionStore()
+const router = useRouter()
 const confirm = useConfirm()
 
 const searchQuery = ref('')
@@ -161,7 +163,10 @@ function formatPrice(price?: number) {
         <h1>黑胶收藏管理</h1>
         <p>浏览示例专辑，管理你的个人黑胶收藏</p>
       </div>
-      <Button label="添加收藏" icon="pi pi-plus" @click="openCreate" />
+      <div class="header-actions">
+        <Button label="统计" icon="pi pi-chart-bar" severity="secondary" @click="router.push('/stats')" />
+        <Button label="添加收藏" icon="pi pi-plus" @click="openCreate" />
+      </div>
     </header>
 
     <section class="toolbar">
@@ -342,6 +347,11 @@ function formatPrice(price?: number) {
   justify-content: space-between;
   gap: 1rem;
   margin-bottom: 1.5rem;
+}
+
+.header-actions {
+  display: flex;
+  gap: 0.75rem;
 }
 
 .header-text h1 {

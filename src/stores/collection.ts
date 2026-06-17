@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import type { Album, PersonalAlbumForm } from '@/types/album'
+import type { Album, PersonalAlbumForm, CollectionStats, GenreStat } from '@/types/album'
 import mockAlbums from '@/mock/albums.json'
 import type { MockAlbum } from '@/types/album'
 
@@ -39,6 +39,38 @@ export const useCollectionStore = defineStore('collection', {
     /** 全部专辑（Mock + 个人收藏） */
     allAlbums(): Album[] {
       return [...this.mockAlbums, ...this.personalAlbums]
+    },
+
+    /** 个人收藏总张数 */
+    personalTotalCount(): number {
+      return this.personalAlbums.length
+    },
+
+    /** 个人收藏购入总金额 */
+    personalTotalAmount(): number {
+      return this.personalAlbums.reduce((sum, album) => sum + (album.purchasePrice ?? 0), 0)
+    },
+
+    /** 按音乐风格分组的数量列表（全部专辑） */
+    genreStats(): GenreStat[] {
+      const map = new Map<string, number>()
+      for (const album of this.allAlbums) {
+        if (album.genre) {
+          map.set(album.genre, (map.get(album.genre) ?? 0) + 1)
+        }
+      }
+      return Array.from(map.entries())
+        .map(([genre, count]) => ({ genre, count }))
+        .sort((a, b) => b.count - a.count)
+    },
+
+    /** 收藏统计汇总 */
+    collectionStats(): CollectionStats {
+      return {
+        totalCount: this.personalTotalCount,
+        totalAmount: this.personalTotalAmount,
+        genreStats: this.genreStats,
+      }
     },
   },
 
