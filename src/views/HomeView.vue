@@ -292,7 +292,7 @@ function submitForm() {
   if (!isFormValid.value) return
 
   const excludeId = dialogMode.value === 'edit' && selectedAlbum.value ? selectedAlbum.value.id : undefined
-  const result = checkDuplicateAlbum(form.value, store.existsByArtistAndCatalogNumber, excludeId)
+  const result = checkDuplicateAlbum(form.value, store.findAlbumByArtistAndCatalogNumber, excludeId)
   if (result.isDuplicate) {
     duplicateCheckResult.value = result
     duplicateDialogVisible.value = true

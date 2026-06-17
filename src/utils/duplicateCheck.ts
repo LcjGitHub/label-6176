@@ -1,17 +1,32 @@
-import type { DuplicateCheckResult, PersonalAlbumForm } from '@/types/album'
-
-export interface DuplicateCheckOptions {
-  artist: string
-  catalogNumber: string
-  excludeId?: string
-}
+import type { DuplicateCheckResult, PersonalAlbumForm, Album } from '@/types/album'
 
 export function checkDuplicateAlbum(
   form: PersonalAlbumForm,
-  existsFn: (artist: string, catalogNumber: string, excludeId?: string) => DuplicateCheckResult,
+  findFn: (artist: string, catalogNumber: string, excludeId?: string) => Album | undefined,
   excludeId?: string,
 ): DuplicateCheckResult {
-  return existsFn(form.artist, form.catalogNumber, excludeId)
+  const artist = form.artist.trim()
+  const catalogNumber = form.catalogNumber.trim()
+  const found = findFn(artist, catalogNumber, excludeId)
+  return {
+    isDuplicate: !!found,
+    artist,
+    catalogNumber,
+    existingTitle: found?.title,
+  }
+}
+
+export function isDuplicateAlbum(
+  album: Album,
+  existingAlbums: Album[],
+  excludeId?: string,
+): boolean {
+  const artist = album.artist.trim().toLowerCase()
+  const catalogNumber = album.catalogNumber.trim().toLowerCase()
+  return existingAlbums.some((a) => {
+    if (excludeId && a.id === excludeId) return false
+    return a.artist.trim().toLowerCase() === artist && a.catalogNumber.trim().toLowerCase() === catalogNumber
+  })
 }
 
 export function buildDuplicateMessage(result: DuplicateCheckResult): string {

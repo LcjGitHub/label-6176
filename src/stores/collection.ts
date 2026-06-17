@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
-import type { Album, PersonalAlbumForm, CollectionStats, GenreStat, DuplicateCheckResult } from '@/types/album'
+import type { Album, PersonalAlbumForm, CollectionStats, GenreStat } from '@/types/album'
+import { isDuplicateAlbum } from '@/utils/duplicateCheck'
 import mockAlbums from '@/mock/albums.json'
 import type { MockAlbum } from '@/types/album'
 
@@ -138,22 +139,16 @@ export const useCollectionStore = defineStore('collection', {
     },
 
     /**
-     * 检查同一艺人下是否已存在相同编号的专辑
+     * 根据艺人+编号查找个人收藏中的匹配专辑
      * excludeId 用于编辑场景排除自身
      */
-    existsByArtistAndCatalogNumber(artist: string, catalogNumber: string, excludeId?: string): DuplicateCheckResult {
+    findAlbumByArtistAndCatalogNumber(artist: string, catalogNumber: string, excludeId?: string): Album | undefined {
       const trimmedArtist = artist.trim().toLowerCase()
       const trimmedCatalog = catalogNumber.trim().toLowerCase()
-      const found = this.personalAlbums.find((a) => {
+      return this.personalAlbums.find((a) => {
         if (excludeId && a.id === excludeId) return false
         return a.artist.trim().toLowerCase() === trimmedArtist && a.catalogNumber.trim().toLowerCase() === trimmedCatalog
       })
-      return {
-        isDuplicate: !!found,
-        artist: artist.trim(),
-        catalogNumber: catalogNumber.trim(),
-        existingTitle: found?.title,
-      }
     },
 
     /**
@@ -163,7 +158,7 @@ export const useCollectionStore = defineStore('collection', {
       const existingIds = new Set(this.personalAlbums.map((a) => a.id))
       let addedCount = 0
       for (const album of albums) {
-        if (album.source === 'personal' && !existingIds.has(album.id)) {
+        if (album.source === 'personal' && !existingIds.has(album.id) && !isDuplicateAlbum(album, this.personalAlbums)) {
           this.personalAlbums.push(album)
           existingIds.add(album.id)
           addedCount++
