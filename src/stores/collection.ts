@@ -126,6 +126,41 @@ export const useCollectionStore = defineStore('collection', {
     getAlbumById(id: string): Album | undefined {
       return this.allAlbums.find((a) => a.id === id)
     },
+
+    /**
+     * 批量写入个人收藏（追加模式）
+     */
+    batchAddAlbums(albums: Album[]): number {
+      const existingIds = new Set(this.personalAlbums.map((a) => a.id))
+      let addedCount = 0
+      for (const album of albums) {
+        if (album.source === 'personal' && !existingIds.has(album.id)) {
+          this.personalAlbums.push(album)
+          existingIds.add(album.id)
+          addedCount++
+        }
+      }
+      return addedCount
+    },
+
+    /**
+     * 清空全部个人收藏
+     */
+    clearAllAlbums(): number {
+      const count = this.personalAlbums.length
+      this.personalAlbums = []
+      return count
+    },
+
+    /**
+     * 批量覆盖个人收藏（先清空再写入）
+     */
+    batchReplaceAlbums(albums: Album[]): { cleared: number; added: number } {
+      const personalAlbums = albums.filter((a) => a.source === 'personal')
+      const cleared = this.clearAllAlbums()
+      const added = this.batchAddAlbums(personalAlbums)
+      return { cleared, added }
+    },
   },
 
   persist: {

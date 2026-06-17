@@ -4,6 +4,14 @@ import { useRouter } from 'vue-router'
 import { useCollectionStore } from '@/stores/collection'
 import { useBorrowStore } from '@/stores/borrow'
 import { filterBySource, searchAlbums } from '@/utils/search'
+import {
+  exportCollection,
+  parseImportFile,
+  getAlbumsFromExportData,
+  getExportSummary,
+  type CollectionExportData,
+  type ImportMode,
+} from '@/utils/collectionIO'
 import type { Album, AlbumSource, FilterType, PersonalAlbumForm } from '@/types/album'
 import type { BorrowForm, BorrowRecord } from '@/types/borrow'
 import DataView from 'primevue/dataview'
@@ -16,12 +24,23 @@ import Calendar from 'primevue/calendar'
 import Tag from 'primevue/tag'
 import ConfirmDialog from 'primevue/confirmdialog'
 import { useConfirm } from 'primevue/useconfirm'
+import { useToast } from 'primevue/usetoast'
+import RadioButton from 'primevue/radiobutton'
 import AlbumCover from '@/components/AlbumCover.vue'
 
 const store = useCollectionStore()
 const borrowStore = useBorrowStore()
 const router = useRouter()
 const confirm = useConfirm()
+const toast = useToast()
+
+const importModeDialogVisible = ref(false)
+const importMode = ref<ImportMode>('merge')
+const pendingImportData = ref<CollectionExportData | null>(null)
+const pendingImportFile = ref<File | null>(null)
+const importSummary = ref<{ count: number; date: string } | null>(null)
+
+const fileInputRef = ref<HTMLInputElement | null>(null)
 
 const searchQuery = ref('')
 const filterType = ref<FilterType>('all')
@@ -252,6 +271,120 @@ function formatPrice(price?: number) {
   if (price === undefined || price === null) return '—'
   return `¥${price.toFixed(2)}`
 }
+
+function handleExport() {
+  const personalAlbums = store.personalAlbums
+  if (personalAlbums.length === 0) {
+    toast.add({
+      severity: 'warn',
+      summary: '暂无数据',
+      detail: '你还没有收藏任何专辑，无法导出',
+      life: 3000,
+    })
+    return
+  }
+
+  confirm.require({
+    message: `确定要导出全部 ${personalAlbums.length} 条个人收藏数据吗？`,
+    header: '导出确认',
+    icon: 'pi pi-download',
+    rejectLabel: '取消',
+    acceptLabel: '导出',
+    rejectProps: { label: '取消', severity: 'secondary', outlined: true },
+    acceptProps: { label: '导出', severity: 'primary' },
+    accept: () => {
+      exportCollection(personalAlbums)
+      toast.add({
+        severity: 'success',
+        summary: '导出成功',
+        detail: `已导出 ${personalAlbums.length} 条收藏数据`,
+        life: 3000,
+      })
+    },
+  })
+}
+
+function triggerImportFileSelect() {
+  if (fileInputRef.value) {
+    fileInputRef.value.click()
+  }
+}
+
+async function handleFileSelect(event: Event) {
+  const target = event.target as HTMLInputElement
+  const file = target.files?.[0]
+  if (!file) return
+
+  try {
+    const data = await parseImportFile(file)
+    pendingImportData.value = data
+    pendingImportFile.value = file
+    importSummary.value = getExportSummary(data)
+    importMode.value = 'merge'
+    importModeDialogVisible.value = true
+  } catch (error) {
+    toast.add({
+      severity: 'error',
+      summary: '导入失败',
+      detail: error instanceof Error ? error.message : '文件解析失败',
+      life: 4000,
+    })
+  } finally {
+    target.value = ''
+  }
+}
+
+function confirmImport() {
+  if (!pendingImportData.value) return
+
+  const albums = getAlbumsFromExportData(pendingImportData.value)
+  const mode = importMode.value
+  const importCount = albums.length
+  const currentCount = store.personalAlbums.length
+
+  const executeImport = () => {
+    if (mode === 'merge') {
+      const addedCount = store.batchAddAlbums(albums)
+      toast.add({
+        severity: 'success',
+        summary: '导入成功',
+        detail: `合并模式：新增 ${addedCount} 条，跳过 ${importCount - addedCount} 条重复数据`,
+        life: 4000,
+      })
+    } else {
+      const result = store.batchReplaceAlbums(albums)
+      toast.add({
+        severity: 'success',
+        summary: '导入成功',
+        detail: `覆盖模式：清空 ${result.cleared} 条，导入 ${result.added} 条`,
+        life: 4000,
+      })
+    }
+    closeImportDialog()
+  }
+
+  if (mode === 'replace' && currentCount > 0) {
+    confirm.require({
+      message: `覆盖模式将清空当前 ${currentCount} 条收藏，然后导入 ${importCount} 条数据。此操作不可恢复，确定继续吗？`,
+      header: '覆盖确认',
+      icon: 'pi pi-exclamation-triangle',
+      rejectLabel: '取消',
+      acceptLabel: '确认覆盖',
+      rejectProps: { label: '取消', severity: 'secondary', outlined: true },
+      acceptProps: { label: '确认覆盖', severity: 'danger' },
+      accept: executeImport,
+    })
+  } else {
+    executeImport()
+  }
+}
+
+function closeImportDialog() {
+  importModeDialogVisible.value = false
+  pendingImportData.value = null
+  pendingImportFile.value = null
+  importSummary.value = null
+}
 </script>
 
 <template>
@@ -286,12 +419,35 @@ function formatPrice(price?: number) {
           class="search-input"
         />
       </span>
+      <div class="toolbar-actions">
+        <Button
+          label="导出收藏"
+          icon="pi pi-download"
+          severity="secondary"
+          outlined
+          @click="handleExport"
+        />
+        <Button
+          label="导入收藏"
+          icon="pi pi-upload"
+          severity="secondary"
+          outlined
+          @click="triggerImportFileSelect"
+        />
+      </div>
       <SelectButton
         v-model="filterType"
         :options="filterOptions"
         option-label="label"
         option-value="value"
         :allow-empty="false"
+      />
+      <input
+        ref="fileInputRef"
+        type="file"
+        accept=".json"
+        style="display: none"
+        @change="handleFileSelect"
       />
     </section>
 
@@ -558,6 +714,72 @@ function formatPrice(price?: number) {
     </Dialog>
 
     <ConfirmDialog />
+
+    <Dialog
+      v-model:visible="importModeDialogVisible"
+      header="导入收藏"
+      modal
+      :style="{ width: '28rem' }"
+      :breakpoints="{ '640px': '95vw' }"
+      @close="closeImportDialog"
+    >
+      <div class="import-dialog-content">
+        <div class="import-info-card">
+          <i class="pi pi-info-circle import-info-icon" />
+          <div class="import-info-text">
+            <p class="import-info-title">文件信息</p>
+            <p class="import-info-detail" v-if="importSummary">
+              包含 {{ importSummary.count }} 条收藏数据<br />
+              导出时间：{{ importSummary.date }}
+            </p>
+          </div>
+        </div>
+
+        <div class="import-mode-section">
+          <p class="import-mode-title">请选择导入方式</p>
+
+          <div class="import-mode-option">
+            <RadioButton
+              id="merge-mode"
+              v-model="importMode"
+              value="merge"
+              name="importMode"
+            />
+            <label for="merge-mode" class="import-mode-label">
+              <span class="import-mode-name">合并追加</span>
+              <span class="import-mode-desc">保留现有收藏，将新数据追加到列表中，重复数据将被跳过</span>
+            </label>
+          </div>
+
+          <div class="import-mode-option">
+            <RadioButton
+              id="replace-mode"
+              v-model="importMode"
+              value="replace"
+              name="importMode"
+            />
+            <label for="replace-mode" class="import-mode-label">
+              <span class="import-mode-name">覆盖现有</span>
+              <span class="import-mode-desc">清空全部现有收藏，然后导入新数据（此操作不可恢复）</span>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <template #footer>
+        <Button
+          label="取消"
+          severity="secondary"
+          outlined
+          @click="closeImportDialog"
+        />
+        <Button
+          label="确认导入"
+          icon="pi pi-check"
+          @click="confirmImport"
+        />
+      </template>
+    </Dialog>
   </div>
 </template>
 
@@ -869,5 +1091,101 @@ function formatPrice(price?: number) {
   .album-grid {
     grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
   }
+}
+
+.toolbar-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.import-dialog-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.import-info-card {
+  display: flex;
+  gap: 0.875rem;
+  padding: 1rem;
+  background: var(--p-surface-50);
+  border-radius: var(--p-border-radius);
+  border: 1px solid var(--p-content-border-color);
+}
+
+.import-info-icon {
+  font-size: 1.25rem;
+  color: var(--p-primary-color);
+  flex-shrink: 0;
+  margin-top: 0.125rem;
+}
+
+.import-info-text {
+  flex: 1;
+  min-width: 0;
+}
+
+.import-info-title {
+  margin: 0 0 0.25rem;
+  font-weight: 600;
+  color: var(--p-text-color);
+}
+
+.import-info-detail {
+  margin: 0;
+  font-size: 0.875rem;
+  color: var(--p-text-muted-color);
+  line-height: 1.6;
+}
+
+.import-mode-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.import-mode-title {
+  margin: 0;
+  font-weight: 600;
+  color: var(--p-text-color);
+}
+
+.import-mode-option {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 0.875rem;
+  border: 1px solid var(--p-content-border-color);
+  border-radius: var(--p-border-radius);
+  cursor: pointer;
+  transition: border-color 0.2s, background-color 0.2s;
+}
+
+.import-mode-option:hover {
+  border-color: var(--p-primary-color);
+  background: var(--p-surface-50);
+}
+
+.import-mode-option :deep(.p-radiobutton) {
+  margin-top: 0.125rem;
+}
+
+.import-mode-label {
+  flex: 1;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.import-mode-name {
+  font-weight: 600;
+  color: var(--p-text-color);
+}
+
+.import-mode-desc {
+  font-size: 0.85rem;
+  color: var(--p-text-muted-color);
+  line-height: 1.5;
 }
 </style>
