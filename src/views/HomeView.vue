@@ -533,7 +533,7 @@ function closeImportDialog() {
         :allow-empty="false"
       />
       <Button
-        :label="starredOnly ? '仅星标' : '星标筛选'"
+        :label="'仅看星标'"
         :icon="starredOnly ? 'pi pi-star-fill' : 'pi pi-star'"
         :severity="starredOnly ? 'warning' : 'secondary'"
         :outlined="!starredOnly"
@@ -655,6 +655,19 @@ function closeImportDialog() {
           </div>
 
           <dl class="detail-list">
+            <template v-if="isPersonal">
+              <dt>星标</dt>
+              <dd>
+                <Button
+                  :icon="selectedAlbum.starred ? 'pi pi-star-fill' : 'pi pi-star'"
+                  :label="selectedAlbum.starred ? '已标星' : '标星'"
+                  :severity="selectedAlbum.starred ? 'warning' : 'secondary'"
+                  :outlined="!selectedAlbum.starred"
+                  size="small"
+                  @click="onToggleStar"
+                />
+              </dd>
+            </template>
             <dt>专辑名</dt>
             <dd>{{ selectedAlbum.title }}</dd>
             <dt>艺人</dt>
@@ -684,19 +697,6 @@ function closeImportDialog() {
                 :severity="sourceSeverity(selectedAlbum.source)"
               />
             </dd>
-            <template v-if="isPersonal">
-              <dt>星标</dt>
-              <dd>
-                <Button
-                  :icon="selectedAlbum.starred ? 'pi pi-star-fill' : 'pi pi-star'"
-                  :label="selectedAlbum.starred ? '已标星' : '标星'"
-                  :severity="selectedAlbum.starred ? 'warning' : 'secondary'"
-                  :outlined="!selectedAlbum.starred"
-                  size="small"
-                  @click="onToggleStar"
-                />
-              </dd>
-            </template>
           </dl>
         </div>
       </template>
