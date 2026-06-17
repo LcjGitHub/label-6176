@@ -3,7 +3,7 @@ import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useCollectionStore } from '@/stores/collection'
 import { useBorrowStore } from '@/stores/borrow'
-import { filterBySource, searchAlbums } from '@/utils/search'
+import { filterBySource, searchAlbums, sortAlbums } from '@/utils/search'
 import {
   exportCollection,
   parseImportFile,
@@ -12,11 +12,12 @@ import {
   type CollectionExportData,
   type ImportMode,
 } from '@/utils/collectionIO'
-import type { Album, AlbumSource, FilterType, PersonalAlbumForm } from '@/types/album'
+import type { Album, AlbumSource, FilterType, PersonalAlbumForm, SortField, SortOrder } from '@/types/album'
 import type { BorrowForm, BorrowRecord } from '@/types/borrow'
 import DataView from 'primevue/dataview'
 import SelectButton from 'primevue/selectbutton'
 import InputText from 'primevue/inputtext'
+import Dropdown from 'primevue/dropdown'
 import Button from 'primevue/button'
 import Dialog from 'primevue/dialog'
 import InputNumber from 'primevue/inputnumber'
@@ -44,6 +45,8 @@ const fileInputRef = ref<HTMLInputElement | null>(null)
 
 const searchQuery = ref('')
 const filterType = ref<FilterType>('all')
+const sortField = ref<SortField | null>(null)
+const sortOrder = ref<SortOrder>('asc')
 
 const filterOptions = [
   { label: '全部', value: 'all' as FilterType },
@@ -51,10 +54,27 @@ const filterOptions = [
   { label: '我的收藏', value: 'personal' as FilterType },
 ]
 
-/** 筛选并搜索后的专辑列表 */
+const sortFieldOptions = [
+  { label: '默认排序', value: null },
+  { label: '专辑名', value: 'title' as SortField },
+  { label: '艺人', value: 'artist' as SortField },
+  { label: '购入价', value: 'purchasePrice' as SortField },
+  { label: '年份', value: 'year' as SortField },
+]
+
+const sortOrderOptions = [
+  { label: '升序', value: 'asc' as SortOrder },
+  { label: '降序', value: 'desc' as SortOrder },
+]
+
+/** 筛选、搜索并排序后的专辑列表 */
 const displayAlbums = computed(() => {
-  const filtered = filterBySource(store.allAlbums, filterType.value)
-  return searchAlbums(filtered, searchQuery.value)
+  let result = filterBySource(store.allAlbums, filterType.value)
+  result = searchAlbums(result, searchQuery.value)
+  if (sortField.value) {
+    result = sortAlbums(result, sortField.value, sortOrder.value)
+  }
+  return result
 })
 
 /** Dialog 状态 */
@@ -423,6 +443,24 @@ function closeImportDialog() {
           class="search-input"
         />
       </span>
+      <div class="sort-controls">
+        <Dropdown
+          v-model="sortField"
+          :options="sortFieldOptions"
+          option-label="label"
+          option-value="value"
+          placeholder="排序字段"
+          class="sort-dropdown"
+        />
+        <Dropdown
+          v-model="sortOrder"
+          :options="sortOrderOptions"
+          option-label="label"
+          option-value="value"
+          :disabled="!sortField"
+          class="sort-dropdown"
+        />
+      </div>
       <div class="toolbar-actions">
         <Button
           label="导出收藏"
@@ -1100,6 +1138,15 @@ function closeImportDialog() {
 .toolbar-actions {
   display: flex;
   gap: 0.5rem;
+}
+
+.sort-controls {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.sort-dropdown {
+  min-width: 120px;
 }
 
 .import-dialog-content {

@@ -1,5 +1,5 @@
 import Fuse, { type IFuseOptions } from 'fuse.js'
-import type { Album, FilterType } from '@/types/album'
+import type { Album, FilterType, SortField, SortOrder } from '@/types/album'
 
 const fuseOptions: IFuseOptions<Album> = {
   keys: [
@@ -29,4 +29,36 @@ export function searchAlbums(albums: Album[], query: string): Album[] {
 
   const fuse = new Fuse(albums, fuseOptions)
   return fuse.search(trimmed).map((result) => result.item)
+}
+
+/**
+ * 按指定字段和方向排序专辑
+ */
+export function sortAlbums(albums: Album[], field: SortField, order: SortOrder): Album[] {
+  const sorted = [...albums].sort((a, b) => {
+    let comparison = 0
+
+    switch (field) {
+      case 'title':
+      case 'artist':
+        comparison = a[field].localeCompare(b[field], 'zh-CN', { sensitivity: 'base' })
+        break
+      case 'purchasePrice': {
+        const aVal = a.purchasePrice ?? -Infinity
+        const bVal = b.purchasePrice ?? -Infinity
+        comparison = aVal - bVal
+        break
+      }
+      case 'year': {
+        const aVal = a.year ?? -Infinity
+        const bVal = b.year ?? -Infinity
+        comparison = aVal - bVal
+        break
+      }
+    }
+
+    return order === 'asc' ? comparison : -comparison
+  })
+
+  return sorted
 }

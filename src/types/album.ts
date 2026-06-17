@@ -46,6 +46,16 @@ export interface MockAlbum {
 export type FilterType = 'all' | 'mock' | 'personal'
 
 /**
+ * 排序字段
+ */
+export type SortField = 'title' | 'artist' | 'purchasePrice' | 'year'
+
+/**
+ * 排序方向
+ */
+export type SortOrder = 'asc' | 'desc'
+
+/**
  * 按风格分组的统计项
  */
 export interface GenreStat {
