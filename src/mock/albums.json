@@ -1,0 +1,162 @@
+[
+  {
+    "id": "mock-01",
+    "title": "The Dark Side of the Moon",
+    "artist": "Pink Floyd",
+    "catalogNumber": "SHVL 804",
+    "year": 1973,
+    "genre": "Progressive Rock"
+  },
+  {
+    "id": "mock-02",
+    "title": "Abbey Road",
+    "artist": "The Beatles",
+    "catalogNumber": "PCS 7088",
+    "year": 1969,
+    "genre": "Rock"
+  },
+  {
+    "id": "mock-03",
+    "title": "Kind of Blue",
+    "artist": "Miles Davis",
+    "catalogNumber": "CL 1355",
+    "year": 1959,
+    "genre": "Jazz"
+  },
+  {
+    "id": "mock-04",
+    "title": "Rumours",
+    "artist": "Fleetwood Mac",
+    "catalogNumber": "BSK 3010",
+    "year": 1977,
+    "genre": "Rock"
+  },
+  {
+    "id": "mock-05",
+    "title": "Thriller",
+    "artist": "Michael Jackson",
+    "catalogNumber": "QE 38112",
+    "year": 1982,
+    "genre": "Pop"
+  },
+  {
+    "id": "mock-06",
+    "title": "Back in Black",
+    "artist": "AC/DC",
+    "catalogNumber": "HS 9009",
+    "year": 1980,
+    "genre": "Hard Rock"
+  },
+  {
+    "id": "mock-07",
+    "title": "The Wall",
+    "artist": "Pink Floyd",
+    "catalogNumber": "SHDW 411",
+    "year": 1979,
+    "genre": "Progressive Rock"
+  },
+  {
+    "id": "mock-08",
+    "title": "Led Zeppelin IV",
+    "artist": "Led Zeppelin",
+    "catalogNumber": "SD 7208",
+    "year": 1971,
+    "genre": "Hard Rock"
+  },
+  {
+    "id": "mock-09",
+    "title": "Nevermind",
+    "artist": "Nirvana",
+    "catalogNumber": "DGC-24425",
+    "year": 1991,
+    "genre": "Grunge"
+  },
+  {
+    "id": "mock-10",
+    "title": "OK Computer",
+    "artist": "Radiohead",
+    "catalogNumber": "7243 8 32729 1 6",
+    "year": 1997,
+    "genre": "Alternative Rock"
+  },
+  {
+    "id": "mock-11",
+    "title": "Blue",
+    "artist": "Joni Mitchell",
+    "catalogNumber": "KSD 2038",
+    "year": 1971,
+    "genre": "Folk"
+  },
+  {
+    "id": "mock-12",
+    "title": "What's Going On",
+    "artist": "Marvin Gaye",
+    "catalogNumber": "MS 3101",
+    "year": 1971,
+    "genre": "Soul"
+  },
+  {
+    "id": "mock-13",
+    "title": "Pet Sounds",
+    "artist": "The Beach Boys",
+    "catalogNumber": "T 2458",
+    "year": 1966,
+    "genre": "Pop Rock"
+  },
+  {
+    "id": "mock-14",
+    "title": "London Calling",
+    "artist": "The Clash",
+    "catalogNumber": "CLASH 5",
+    "year": 1979,
+    "genre": "Punk Rock"
+  },
+  {
+    "id": "mock-15",
+    "title": "A Night at the Opera",
+    "artist": "Queen",
+    "catalogNumber": "ELP 300",
+    "year": 1975,
+    "genre": "Rock"
+  },
+  {
+    "id": "mock-16",
+    "title": "Songs in the Key of Life",
+    "artist": "Stevie Wonder",
+    "catalogNumber": "T13-340C2",
+    "year": 1976,
+    "genre": "Soul"
+  },
+  {
+    "id": "mock-17",
+    "title": "The Velvet Underground & Nico",
+    "artist": "The Velvet Underground",
+    "catalogNumber": "V6-5008",
+    "year": 1967,
+    "genre": "Art Rock"
+  },
+  {
+    "id": "mock-18",
+    "title": "Revolver",
+    "artist": "The Beatles",
+    "catalogNumber": "PCS 7009",
+    "year": 1966,
+    "genre": "Rock"
+  },
+  {
+    "id": "mock-19",
+    "title": "Exile on Main St.",
+    "artist": "The Rolling Stones",
+    "catalogNumber": "COC 69100",
+    "year": 1972,
+    "genre": "Rock"
+  },
+  {
+    "id": "mock-20",
+    "title": "Purple Rain",
+    "artist": "Prince",
+    "catalogNumber": "9 25110-1",
+    "year": 1984,
+    "genre": "Pop Rock"
+  }
+]
