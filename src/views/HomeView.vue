@@ -118,6 +118,7 @@ const emptyForm = (): PersonalAlbumForm => ({
   catalogNumber: '',
   genre: '',
   purchasePrice: null,
+  purchaseDate: '',
 })
 
 const form = ref<PersonalAlbumForm>(emptyForm())
@@ -145,6 +146,7 @@ const borrowDialogVisible = ref(false)
 
 const borrowDateRef = ref<Date>(new Date())
 const expectedReturnDateRef = ref<Date>(new Date(Date.now() + 7 * 24 * 60 * 60 * 1000))
+const purchaseDateRef = ref<Date | null>(null)
 
 const emptyBorrowForm = (): BorrowForm => {
   const today = new Date()
@@ -200,6 +202,12 @@ function onReturnDateChange(e: any) {
   }
 }
 
+function onPurchaseDateChange(e: any) {
+  if (e.value) {
+    form.value.purchaseDate = dateToStr(e.value)
+  }
+}
+
 function submitBorrow() {
   if (!isBorrowFormValid.value || !selectedAlbum.value) return
   borrowStore.createBorrow(selectedAlbum.value, borrowForm.value)
@@ -229,7 +237,8 @@ const isFormValid = computed(() => {
     form.value.catalogNumber.trim() !== '' &&
     form.value.genre.trim() !== '' &&
     form.value.purchasePrice !== null &&
-    form.value.purchasePrice >= 0
+    form.value.purchasePrice >= 0 &&
+    form.value.purchaseDate !== ''
   )
 })
 
@@ -248,6 +257,8 @@ function openView(album: Album) {
 function openCreate() {
   selectedAlbum.value = null
   form.value = emptyForm()
+  purchaseDateRef.value = new Date()
+  form.value.purchaseDate = dateToStr(new Date())
   dialogMode.value = 'create'
   dialogVisible.value = true
 }
@@ -263,7 +274,9 @@ function openEdit() {
     catalogNumber: selectedAlbum.value.catalogNumber,
     genre: selectedAlbum.value.genre ?? '',
     purchasePrice: selectedAlbum.value.purchasePrice ?? 0,
+    purchaseDate: selectedAlbum.value.purchaseDate ?? '',
   }
+  purchaseDateRef.value = selectedAlbum.value.purchaseDate ? new Date(selectedAlbum.value.purchaseDate) : null
   dialogMode.value = 'edit'
 }
 
@@ -320,6 +333,15 @@ function sourceLabel(source: AlbumSource) {
 function formatPrice(price?: number) {
   if (price === undefined || price === null) return '—'
   return `¥${price.toFixed(2)}`
+}
+
+function formatPurchaseDateShort(dateStr?: string) {
+  if (!dateStr) return ''
+  const date = new Date(dateStr)
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const day = String(date.getDate()).padStart(2, '0')
+  return `${year}/${month}/${day}`
 }
 
 function handleExport() {
@@ -473,25 +495,27 @@ function closeImportDialog() {
           class="search-input"
         />
       </span>
-      <div class="sort-controls">
-        <span class="sort-label">排序：</span>
-        <Dropdown
-          v-model="sortOption"
-          :options="sortOptions"
-          option-label="label"
-          option-value="value"
-          class="sort-dropdown"
-        />
-      </div>
-      <div class="genre-controls">
-        <span class="genre-label">风格：</span>
-        <Dropdown
-          v-model="genreFilter"
-          :options="genreOptions"
-          option-label="label"
-          option-value="value"
-          class="genre-dropdown"
-        />
+      <div class="filter-controls">
+        <div class="sort-controls">
+          <span class="sort-label">排序：</span>
+          <Dropdown
+            v-model="sortOption"
+            :options="sortOptions"
+            option-label="label"
+            option-value="value"
+            class="sort-dropdown"
+          />
+        </div>
+        <div class="genre-controls">
+          <span class="genre-label">风格：</span>
+          <Dropdown
+            v-model="genreFilter"
+            :options="genreOptions"
+            option-label="label"
+            option-value="value"
+            class="genre-dropdown"
+          />
+        </div>
       </div>
       <SelectButton
         v-model="filterType"
@@ -548,6 +572,10 @@ function closeImportDialog() {
                 <span v-if="album.purchasePrice !== undefined" class="price">
                   {{ formatPrice(album.purchasePrice) }}
                 </span>
+              </div>
+              <div v-if="album.purchaseDate" class="album-purchase-date">
+                <i class="pi pi-calendar" />
+                <span>{{ formatPurchaseDateShort(album.purchaseDate) }}</span>
               </div>
             </div>
           </div>
@@ -630,6 +658,10 @@ function closeImportDialog() {
               <dt>购入价</dt>
               <dd>{{ formatPrice(selectedAlbum.purchasePrice) }}</dd>
             </template>
+            <template v-if="selectedAlbum.source === 'personal' && selectedAlbum.purchaseDate">
+              <dt>购入日期</dt>
+              <dd>{{ formatDate(selectedAlbum.purchaseDate) }}</dd>
+            </template>
             <dt>来源</dt>
             <dd>
               <Tag
@@ -670,6 +702,18 @@ function closeImportDialog() {
               locale="zh-CN"
               class="w-full"
               :min="0"
+            />
+          </div>
+          <div class="field">
+            <label for="purchase-date">购入日期 <span class="required">*</span></label>
+            <Calendar
+              id="purchase-date"
+              v-model="purchaseDateRef"
+              dateFormat="yy-mm-dd"
+              :showIcon="true"
+              class="w-full"
+              :maxDate="new Date()"
+              @change="onPurchaseDateChange"
             />
           </div>
         </div>
@@ -966,6 +1010,19 @@ function closeImportDialog() {
   color: var(--p-primary-color);
 }
 
+.album-purchase-date {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  margin-top: 0.5rem;
+  font-size: 0.75rem;
+  color: var(--p-text-muted-color);
+}
+
+.album-purchase-date .pi {
+  font-size: 0.7rem;
+}
+
 .empty-state {
   text-align: center;
   padding: 3rem 1rem;
@@ -1176,6 +1233,13 @@ function closeImportDialog() {
   display: flex;
   align-items: center;
   gap: 0.5rem;
+}
+
+.filter-controls {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: nowrap;
 }
 
 .sort-label {

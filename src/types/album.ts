@@ -14,6 +14,7 @@ export interface Album {
   year?: number
   genre?: string
   purchasePrice?: number
+  purchaseDate?: string
   source: AlbumSource
 }
 
@@ -26,6 +27,7 @@ export interface PersonalAlbumForm {
   catalogNumber: string
   genre: string
   purchasePrice: number | null
+  purchaseDate: string
 }
 
 /**

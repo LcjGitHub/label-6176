@@ -86,6 +86,7 @@ export const useCollectionStore = defineStore('collection', {
         catalogNumber: form.catalogNumber.trim(),
         genre: form.genre.trim(),
         purchasePrice: form.purchasePrice ?? 0,
+        purchaseDate: form.purchaseDate,
         source: 'personal',
       }
       this.personalAlbums.push(album)
@@ -106,6 +107,7 @@ export const useCollectionStore = defineStore('collection', {
         catalogNumber: form.catalogNumber.trim(),
         genre: form.genre.trim(),
         purchasePrice: form.purchasePrice ?? 0,
+        purchaseDate: form.purchaseDate,
       }
       return true
     },
