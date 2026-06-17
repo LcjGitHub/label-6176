@@ -10,7 +10,7 @@ export function transferToCollection(item: WishlistItem): boolean {
     title: item.title,
     artist: item.artist,
     catalogNumber: item.catalogNumber,
-    genre: '',
+    genre: '未分类',
     purchasePrice: item.expectedPrice,
   })
 

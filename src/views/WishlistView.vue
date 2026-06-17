@@ -8,6 +8,8 @@ import type { WishlistItem, WishlistItemForm } from '@/types/wishlist'
 import Button from 'primevue/button'
 import InputText from 'primevue/inputtext'
 import InputNumber from 'primevue/inputnumber'
+import InputGroup from 'primevue/inputgroup'
+import InputIcon from 'primevue/inputicon'
 import Dialog from 'primevue/dialog'
 import Tag from 'primevue/tag'
 import ConfirmDialog from 'primevue/confirmdialog'
@@ -72,11 +74,12 @@ function submitForm() {
   dialogMode.value = 'view'
 }
 
-function handleTransfer() {
-  if (!selectedItem.value) return
+function handleTransfer(item?: WishlistItem) {
+  const target = item ?? selectedItem.value
+  if (!target) return
 
   confirm.require({
-    message: `确定将「${selectedItem.value.title}」转入个人收藏吗？心愿单中将移除该条目。`,
+    message: `确定将「${target.title}」转入个人收藏吗？心愿单中将移除该条目。`,
     header: '转入收藏',
     icon: 'pi pi-arrow-right',
     rejectLabel: '取消',
@@ -84,9 +87,11 @@ function handleTransfer() {
     rejectProps: { label: '取消', severity: 'secondary', outlined: true },
     acceptProps: { label: '转入', severity: 'success' },
     accept: () => {
-      transferToCollection(selectedItem.value!)
-      dialogVisible.value = false
-      selectedItem.value = null
+      transferToCollection(target)
+      if (selectedItem.value?.id === target.id) {
+        dialogVisible.value = false
+        selectedItem.value = null
+      }
     },
   })
 }
@@ -154,14 +159,14 @@ function goBack() {
     </section>
 
     <section class="toolbar">
-      <span class="p-input-icon-left search-box">
-        <i class="pi pi-search" />
+      <InputGroup class="search-box">
+        <InputIcon class="pi pi-search" />
         <InputText
           v-model="searchQuery"
           placeholder="搜索专辑名、艺人、编号..."
           class="search-input"
         />
-      </span>
+      </InputGroup>
     </section>
 
     <p class="result-count">共 {{ displayItems.length }} 条心愿</p>
@@ -183,6 +188,14 @@ function goBack() {
             <Tag :value="item.catalogNumber" severity="secondary" />
             <span class="expected-price">{{ formatPrice(item.expectedPrice) }}</span>
           </div>
+          <Button
+            label="转入收藏"
+            icon="pi pi-arrow-right"
+            severity="success"
+            size="small"
+            class="card-transfer-btn"
+            @click.stop="handleTransfer(item)"
+          />
         </div>
       </div>
     </div>
@@ -453,12 +466,17 @@ function goBack() {
   align-items: center;
   justify-content: space-between;
   gap: 0.5rem;
+  margin-bottom: 0.75rem;
 }
 
 .expected-price {
   font-size: 0.8rem;
   font-weight: 600;
   color: var(--p-primary-color);
+}
+
+.card-transfer-btn {
+  width: 100%;
 }
 
 .empty-state {
