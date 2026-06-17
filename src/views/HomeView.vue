@@ -360,22 +360,25 @@ function confirmImport() {
         life: 4000,
       })
     }
-    closeImportDialog()
   }
 
   if (mode === 'replace' && currentCount > 0) {
-    confirm.require({
-      message: `覆盖模式将清空当前 ${currentCount} 条收藏，然后导入 ${importCount} 条数据。此操作不可恢复，确定继续吗？`,
-      header: '覆盖确认',
-      icon: 'pi pi-exclamation-triangle',
-      rejectLabel: '取消',
-      acceptLabel: '确认覆盖',
-      rejectProps: { label: '取消', severity: 'secondary', outlined: true },
-      acceptProps: { label: '确认覆盖', severity: 'danger' },
-      accept: executeImport,
-    })
+    closeImportDialog()
+    setTimeout(() => {
+      confirm.require({
+        message: `覆盖模式将清空当前 ${currentCount} 条收藏，然后导入 ${importCount} 条数据。此操作不可恢复，确定继续吗？`,
+        header: '覆盖确认',
+        icon: 'pi pi-exclamation-triangle',
+        rejectLabel: '取消',
+        acceptLabel: '确认覆盖',
+        rejectProps: { label: '取消', severity: 'secondary', outlined: true },
+        acceptProps: { label: '确认覆盖', severity: 'danger' },
+        accept: executeImport,
+      })
+    }, 100)
   } else {
     executeImport()
+    closeImportDialog()
   }
 }
 
@@ -738,7 +741,7 @@ function closeImportDialog() {
         <div class="import-mode-section">
           <p class="import-mode-title">请选择导入方式</p>
 
-          <div class="import-mode-option">
+          <div class="import-mode-option" @click="importMode = 'merge'">
             <RadioButton
               id="merge-mode"
               v-model="importMode"
@@ -751,7 +754,7 @@ function closeImportDialog() {
             </label>
           </div>
 
-          <div class="import-mode-option">
+          <div class="import-mode-option" @click="importMode = 'replace'">
             <RadioButton
               id="replace-mode"
               v-model="importMode"

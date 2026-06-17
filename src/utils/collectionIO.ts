@@ -20,34 +20,72 @@ export interface ImportResult {
 
 const CURRENT_EXPORT_VERSION = '1.0'
 
-function validateAlbum(album: unknown): album is Album {
-  if (!album || typeof album !== 'object') return false
+interface ValidationResult {
+  valid: boolean
+  error?: string
+}
+
+function validateAlbum(album: unknown, index: number): ValidationResult {
+  if (!album || typeof album !== 'object') {
+    return { valid: false, error: `第 ${index + 1} 条数据格式不正确` }
+  }
 
   const a = album as Record<string, unknown>
 
-  if (typeof a.id !== 'string' || a.id.trim() === '') return false
-  if (typeof a.title !== 'string' || a.title.trim() === '') return false
-  if (typeof a.artist !== 'string' || a.artist.trim() === '') return false
-  if (typeof a.catalogNumber !== 'string' || a.catalogNumber.trim() === '') return false
-  if (a.source !== 'personal') return false
+  if (typeof a.id !== 'string' || a.id.trim() === '') {
+    return { valid: false, error: `第 ${index + 1} 条数据缺少有效的 id 字段` }
+  }
+  if (typeof a.title !== 'string' || a.title.trim() === '') {
+    return { valid: false, error: `第 ${index + 1} 条数据缺少专辑名（title）` }
+  }
+  if (typeof a.artist !== 'string' || a.artist.trim() === '') {
+    return { valid: false, error: `第 ${index + 1} 条数据缺少艺人（artist）` }
+  }
+  if (typeof a.catalogNumber !== 'string' || a.catalogNumber.trim() === '') {
+    return { valid: false, error: `第 ${index + 1} 条数据缺少编号（catalogNumber）` }
+  }
+  if (typeof a.genre !== 'string' || a.genre.trim() === '') {
+    return { valid: false, error: `第 ${index + 1} 条数据缺少风格（genre）` }
+  }
+  if (typeof a.purchasePrice !== 'number' || a.purchasePrice < 0) {
+    return { valid: false, error: `第 ${index + 1} 条数据缺少有效的购入价（purchasePrice，需为非负数）` }
+  }
+  if (a.source !== 'personal') {
+    return { valid: false, error: `第 ${index + 1} 条数据来源（source）必须为 personal` }
+  }
 
-  if (a.year !== undefined && typeof a.year !== 'number') return false
-  if (a.genre !== undefined && typeof a.genre !== 'string') return false
-  if (a.purchasePrice !== undefined && typeof a.purchasePrice !== 'number') return false
+  if (a.year !== undefined && typeof a.year !== 'number') {
+    return { valid: false, error: `第 ${index + 1} 条数据年份（year）格式不正确` }
+  }
 
-  return true
+  return { valid: true }
 }
 
-function validateExportData(data: unknown): data is CollectionExportData {
-  if (!data || typeof data !== 'object') return false
+function validateExportData(data: unknown): ValidationResult {
+  if (!data || typeof data !== 'object') {
+    return { valid: false, error: '数据文件格式不正确' }
+  }
 
   const d = data as Record<string, unknown>
 
-  if (d.version !== CURRENT_EXPORT_VERSION) return false
-  if (typeof d.exportedAt !== 'number') return false
-  if (!Array.isArray(d.data)) return false
+  if (d.version !== CURRENT_EXPORT_VERSION) {
+    return { valid: false, error: `数据版本不兼容，当前支持版本 ${CURRENT_EXPORT_VERSION}` }
+  }
+  if (typeof d.exportedAt !== 'number') {
+    return { valid: false, error: '数据缺少导出时间戳' }
+  }
+  if (!Array.isArray(d.data)) {
+    return { valid: false, error: '数据格式不正确，缺少 data 数组' }
+  }
 
-  return d.data.every(validateAlbum)
+  for (let i = 0; i < d.data.length; i++) {
+    const result = validateAlbum(d.data[i], i)
+    if (!result.valid) {
+      return result
+    }
+  }
+
+  return { valid: true }
 }
 
 function generateFileName(): string {
@@ -94,12 +132,13 @@ export function parseImportFile(file: File): Promise<CollectionExportData> {
         const content = e.target?.result as string
         const data = JSON.parse(content)
 
-        if (!validateExportData(data)) {
-          reject(new Error('数据文件格式不正确或已损坏'))
+        const validation = validateExportData(data)
+        if (!validation.valid) {
+          reject(new Error(`导入失败：${validation.error}`))
           return
         }
 
-        resolve(data)
+        resolve(data as CollectionExportData)
       } catch {
         reject(new Error('文件解析失败，请确保文件格式正确'))
       }
