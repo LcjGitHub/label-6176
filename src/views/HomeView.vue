@@ -67,16 +67,18 @@ const sortOptions = [
 ]
 
 /**
- * 经过来源筛选后的专辑列表，用于提取风格下拉选项
- * 这样风格选项只会显示当前来源范围内存在的风格
+ * 经过来源筛选 + 关键词搜索后的专辑列表，用于提取风格下拉选项
+ * 这样风格选项只会显示当前搜索结果中存在的风格
  */
-const sourceFilteredAlbums = computed(() => {
-  return filterBySource(store.allAlbums, filterType.value)
+const preGenreAlbums = computed(() => {
+  let result = filterBySource(store.allAlbums, filterType.value)
+  result = searchAlbums(result, searchQuery.value)
+  return result
 })
 
-/** 从当前来源筛选后的专辑中提取去重风格，生成下拉选项 */
+/** 从来源筛选+搜索后的专辑中提取去重风格，生成下拉选项 */
 const genreOptions = computed(() => {
-  const uniqueGenres = extractUniqueGenres(sourceFilteredAlbums.value)
+  const uniqueGenres = extractUniqueGenres(preGenreAlbums.value)
   const options = [{ label: '全部风格', value: 'all' as GenreFilterType }]
   for (const genre of uniqueGenres) {
     options.push({ label: genre, value: genre as GenreFilterType })
@@ -86,9 +88,8 @@ const genreOptions = computed(() => {
 
 /** 筛选、搜索并排序后的专辑列表 */
 const displayAlbums = computed(() => {
-  let result = sourceFilteredAlbums.value
+  let result = preGenreAlbums.value
   result = filterByGenre(result, genreFilter.value)
-  result = searchAlbums(result, searchQuery.value)
   if (sortOption.value !== 'default') {
     const [field, order] = sortOption.value.split('-') as [string, string]
     result = sortAlbums(result, field as any, order as any)
@@ -482,6 +483,23 @@ function closeImportDialog() {
           class="sort-dropdown"
         />
       </div>
+      <div class="genre-controls">
+        <span class="genre-label">风格：</span>
+        <Dropdown
+          v-model="genreFilter"
+          :options="genreOptions"
+          option-label="label"
+          option-value="value"
+          class="genre-dropdown"
+        />
+      </div>
+      <SelectButton
+        v-model="filterType"
+        :options="filterOptions"
+        option-label="label"
+        option-value="value"
+        :allow-empty="false"
+      />
       <div class="toolbar-actions">
         <Button
           label="导出收藏"
@@ -496,23 +514,6 @@ function closeImportDialog() {
           severity="secondary"
           outlined
           @click="triggerImportFileSelect"
-        />
-      </div>
-      <SelectButton
-        v-model="filterType"
-        :options="filterOptions"
-        option-label="label"
-        option-value="value"
-        :allow-empty="false"
-      />
-      <div class="genre-controls">
-        <span class="genre-label">风格：</span>
-        <Dropdown
-          v-model="genreFilter"
-          :options="genreOptions"
-          option-label="label"
-          option-value="value"
-          class="genre-dropdown"
         />
       </div>
       <input
