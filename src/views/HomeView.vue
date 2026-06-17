@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useCollectionStore } from '@/stores/collection'
 import { useBorrowStore } from '@/stores/borrow'
-import { filterBySource, searchAlbums, sortAlbums } from '@/utils/search'
+import { filterBySource, filterByGenre, searchAlbums, sortAlbums, extractUniqueGenres } from '@/utils/search'
 import {
   exportCollection,
   parseImportFile,
@@ -12,7 +12,7 @@ import {
   type CollectionExportData,
   type ImportMode,
 } from '@/utils/collectionIO'
-import type { Album, AlbumSource, FilterType, PersonalAlbumForm, SortOptionValue } from '@/types/album'
+import type { Album, AlbumSource, FilterType, GenreFilterType, PersonalAlbumForm, SortOptionValue } from '@/types/album'
 import type { BorrowForm, BorrowRecord } from '@/types/borrow'
 import DataView from 'primevue/dataview'
 import SelectButton from 'primevue/selectbutton'
@@ -45,6 +45,7 @@ const fileInputRef = ref<HTMLInputElement | null>(null)
 
 const searchQuery = ref('')
 const filterType = ref<FilterType>('all')
+const genreFilter = ref<GenreFilterType>('all')
 const sortOption = ref<SortOptionValue>('default')
 
 const filterOptions = [
@@ -65,15 +66,44 @@ const sortOptions = [
   { label: '年份降序', value: 'year-desc' as SortOptionValue },
 ]
 
+/**
+ * 经过来源筛选后的专辑列表，用于提取风格下拉选项
+ * 这样风格选项只会显示当前来源范围内存在的风格
+ */
+const sourceFilteredAlbums = computed(() => {
+  return filterBySource(store.allAlbums, filterType.value)
+})
+
+/** 从当前来源筛选后的专辑中提取去重风格，生成下拉选项 */
+const genreOptions = computed(() => {
+  const uniqueGenres = extractUniqueGenres(sourceFilteredAlbums.value)
+  const options = [{ label: '全部风格', value: 'all' as GenreFilterType }]
+  for (const genre of uniqueGenres) {
+    options.push({ label: genre, value: genre as GenreFilterType })
+  }
+  return options
+})
+
 /** 筛选、搜索并排序后的专辑列表 */
 const displayAlbums = computed(() => {
-  let result = filterBySource(store.allAlbums, filterType.value)
+  let result = sourceFilteredAlbums.value
+  result = filterByGenre(result, genreFilter.value)
   result = searchAlbums(result, searchQuery.value)
   if (sortOption.value !== 'default') {
     const [field, order] = sortOption.value.split('-') as [string, string]
     result = sortAlbums(result, field as any, order as any)
   }
   return result
+})
+
+/**
+ * 当风格选项变化时（例如切换了来源筛选），如果当前选中的风格不再可用，自动重置为"全部风格"
+ */
+watch(genreOptions, (options) => {
+  const availableValues = options.map((o) => o.value)
+  if (!availableValues.includes(genreFilter.value)) {
+    genreFilter.value = 'all'
+  }
 })
 
 /** Dialog 状态 */
@@ -475,6 +505,16 @@ function closeImportDialog() {
         option-value="value"
         :allow-empty="false"
       />
+      <div class="genre-controls">
+        <span class="genre-label">风格：</span>
+        <Dropdown
+          v-model="genreFilter"
+          :options="genreOptions"
+          option-label="label"
+          option-value="value"
+          class="genre-dropdown"
+        />
+      </div>
       <input
         ref="fileInputRef"
         type="file"
@@ -1145,6 +1185,22 @@ function closeImportDialog() {
 
 .sort-dropdown {
   min-width: 140px;
+}
+
+.genre-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.genre-label {
+  font-size: 0.875rem;
+  color: var(--p-text-muted-color);
+  white-space: nowrap;
+}
+
+.genre-dropdown {
+  min-width: 160px;
 }
 
 .import-dialog-content {

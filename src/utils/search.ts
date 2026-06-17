@@ -1,5 +1,5 @@
 import Fuse, { type IFuseOptions } from 'fuse.js'
-import type { Album, FilterType, SortField, SortOrder } from '@/types/album'
+import type { Album, FilterType, GenreFilterType, SortField, SortOrder } from '@/types/album'
 
 const fuseOptions: IFuseOptions<Album> = {
   keys: [
@@ -18,6 +18,27 @@ export function filterBySource(albums: Album[], filter: FilterType): Album[] {
   if (filter === 'mock') return albums.filter((a) => a.source === 'mock')
   if (filter === 'personal') return albums.filter((a) => a.source === 'personal')
   return albums
+}
+
+/**
+ * 按风格筛选专辑
+ */
+export function filterByGenre(albums: Album[], genre: GenreFilterType): Album[] {
+  if (genre === 'all') return albums
+  return albums.filter((a) => a.genre === genre)
+}
+
+/**
+ * 从专辑列表中提取去重后的风格列表（按字母排序）
+ */
+export function extractUniqueGenres(albums: Album[]): string[] {
+  const genreSet = new Set<string>()
+  for (const album of albums) {
+    if (album.genre && album.genre.trim() !== '') {
+      genreSet.add(album.genre)
+    }
+  }
+  return [...genreSet].sort((a, b) => a.localeCompare(b, 'en', { sensitivity: 'base' }))
 }
 
 /**

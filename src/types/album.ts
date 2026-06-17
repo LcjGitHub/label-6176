@@ -46,6 +46,11 @@ export interface MockAlbum {
 export type FilterType = 'all' | 'mock' | 'personal'
 
 /**
+ * 风格筛选类型，'all' 表示不筛选，其他值为具体风格名称
+ */
+export type GenreFilterType = 'all' | string
+
+/**
  * 排序字段
  */
 export type SortField = 'title' | 'artist' | 'purchasePrice' | 'year'
