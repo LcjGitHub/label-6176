@@ -4,37 +4,37 @@
       "id": "sp-01",
       "name": "白鹭",
       "scientificName": "Ardea alba",
-      "imageUrl": "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=elegant%20white%20egret%20bird%20standing%20in%20shallow%20water%20nature%20photography&image_size=landscape_16_9"
+      "imageUrl": "/bird-placeholder.svg"
     },
     {
       "id": "sp-02",
       "name": "红嘴蓝鹊",
       "scientificName": "Urocissa erythroryncha",
-      "imageUrl": "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=red-billed%20blue%20magpie%20bird%20on%20branch%20nature%20photography&image_size=landscape_16_9"
+      "imageUrl": "/bird-placeholder.svg"
     },
     {
       "id": "sp-03",
       "name": "翠鸟",
       "scientificName": "Alcedo atthis",
-      "imageUrl": "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=common%20kingfisher%20bird%20perched%20on%20reed%20nature%20photography&image_size=landscape_16_9"
+      "imageUrl": "/bird-placeholder.svg"
     },
     {
       "id": "sp-04",
       "name": "喜鹊",
       "scientificName": "Pica pica",
-      "imageUrl": "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=black%20and%20white%20magpie%20bird%20in%20flight%20nature%20photography&image_size=landscape_16_9"
+      "imageUrl": "/bird-placeholder.svg"
     },
     {
       "id": "sp-05",
       "name": "戴胜",
       "scientificName": "Upupa epops",
-      "imageUrl": "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=hoopoe%20bird%20with%20crest%20on%20ground%20nature%20photography&image_size=landscape_16_9"
+      "imageUrl": "/bird-placeholder.svg"
     },
     {
       "id": "sp-06",
       "name": "鸳鸯",
       "scientificName": "Aix galericulata",
-      "imageUrl": "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=mandarin%20duck%20pair%20on%20pond%20nature%20photography&image_size=landscape_16_9"
+      "imageUrl": "/bird-placeholder.svg"
     }
   ],
   "sightings": [

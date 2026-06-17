@@ -15,7 +15,6 @@ const store = useSightingStore()
 const speciesId = computed(() => route.params.id as string)
 const species = computed(() => store.getSpeciesById(speciesId.value))
 const sightings = computed(() => store.getSightingsBySpeciesId(speciesId.value))
-const totalCount = computed(() => store.getTotalCountBySpeciesId(speciesId.value))
 
 function formatDate(dateStr: string) {
   return new Date(dateStr).toLocaleDateString('zh-CN')
@@ -40,16 +39,6 @@ function goBack() {
         <div class="species-info">
           <h1 class="species-name">{{ species.name }}</h1>
           <p class="species-scientific-name">{{ species.scientificName }}</p>
-          <div class="species-stats">
-            <div class="stat-item">
-              <span class="stat-number">{{ sightings.length }}</span>
-              <span class="stat-label">目击次数</span>
-            </div>
-            <div class="stat-item">
-              <span class="stat-number">{{ totalCount }}</span>
-              <span class="stat-label">累计数量</span>
-            </div>
-          </div>
         </div>
       </section>
 
@@ -153,29 +142,6 @@ function goBack() {
   color: var(--p-text-muted-color);
 }
 
-.species-stats {
-  display: flex;
-  gap: 2rem;
-  margin-top: 0.5rem;
-}
-
-.stat-item {
-  display: flex;
-  flex-direction: column;
-  gap: 0.125rem;
-}
-
-.stat-number {
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: var(--p-primary-color);
-}
-
-.stat-label {
-  font-size: 0.85rem;
-  color: var(--p-text-muted-color);
-}
-
 .sightings-section h2 {
   margin: 0;
   font-size: 1.25rem;
@@ -222,14 +188,6 @@ function goBack() {
 
   .species-name {
     font-size: 1.5rem;
-  }
-
-  .species-stats {
-    gap: 1.5rem;
-  }
-
-  .stat-number {
-    font-size: 1.25rem;
   }
 }
 </style>

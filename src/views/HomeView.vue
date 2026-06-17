@@ -400,6 +400,7 @@ function closeImportDialog() {
       <div class="header-actions">
         <Button label="心愿单" icon="pi pi-heart" severity="help" outlined @click="router.push('/wishlist')" />
         <Button label="统计" icon="pi pi-chart-bar" severity="secondary" outlined @click="router.push('/stats')" />
+        <Button label="目击时间线" icon="pi pi-eye" severity="success" outlined @click="router.push('/timeline')" />
         <div class="borrow-btn-wrapper">
           <Button
             label="在借列表"

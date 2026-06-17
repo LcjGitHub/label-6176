@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 240" width="400" height="240">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#4f81bd;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#3d6a9e;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#2c4a6e;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  <rect width="400" height="240" fill="url(#bg)" rx="4" />
+  <text x="200" y="130" text-anchor="middle" font-family="Arial, sans-serif" font-size="60" fill="#ffffff" opacity="0.75">
+    🐦
+  </text>
+  <text x="200" y="185" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" fill="#ffffff" opacity="0.6" letter-spacing="6">
+    BIRD IMAGE
+  </text>
+</svg>

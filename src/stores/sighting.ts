@@ -2,6 +2,17 @@ import { defineStore } from 'pinia'
 import type { Species, SightingRecord } from '@/types/species'
 import mockData from '@/mock/sightings.json'
 
+export interface SightingRecordWithSpecies {
+  id: string
+  speciesId: string
+  speciesName: string
+  scientificName: string
+  date: string
+  location: string
+  count: number
+  notes: string
+}
+
 export const useSightingStore = defineStore('sighting', {
   state: () => ({
     speciesList: mockData.species as Species[],
@@ -41,6 +52,20 @@ export const useSightingStore = defineStore('sighting', {
       return this.sightings
         .filter((s) => s.speciesId === speciesId)
         .reduce((sum, s) => sum + s.count, 0)
+    },
+
+    getAllSightingsSorted(): SightingRecordWithSpecies[] {
+      const speciesMap = new Map(this.speciesList.map((sp) => [sp.id, sp]))
+      return this.sightings
+        .map((s) => {
+          const sp = speciesMap.get(s.speciesId)
+          return {
+            ...s,
+            speciesName: sp?.name ?? '未知',
+            scientificName: sp?.scientificName ?? '',
+          }
+        })
+        .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
     },
   },
 })

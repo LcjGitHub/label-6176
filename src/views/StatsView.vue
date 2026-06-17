@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { useCollectionStore } from '@/stores/collection'
 import { useWishlistStore } from '@/stores/wishlist'
-import { useSightingStore } from '@/stores/sighting'
 import { useRouter } from 'vue-router'
 import Button from 'primevue/button'
 import Card from 'primevue/card'
@@ -11,7 +10,6 @@ import Tag from 'primevue/tag'
 
 const store = useCollectionStore()
 const wishlistStore = useWishlistStore()
-const sightingStore = useSightingStore()
 const router = useRouter()
 const stats = store.collectionStats
 
@@ -21,10 +19,6 @@ function formatPrice(price: number) {
 
 function goBack() {
   router.push('/')
-}
-
-function goToSpecies(speciesId: string) {
-  router.push({ name: 'species-detail', params: { id: speciesId } })
 }
 </script>
 
@@ -113,34 +107,6 @@ function goToSpecies(speciesId: string) {
         </template>
       </Card>
     </section>
-
-    <section class="species-section">
-      <Card>
-        <template #title>
-          <h2>鸟种目击统计</h2>
-        </template>
-        <template #content>
-          <DataTable :value="sightingStore.speciesSightingCounts" :paginator="false" stripedRows>
-            <Column field="speciesName" header="鸟种名称">
-              <template #body="slotProps">
-                <span class="species-link" @click="goToSpecies(slotProps.data.speciesId)">
-                  {{ slotProps.data.speciesName }}
-                </span>
-              </template>
-            </Column>
-            <Column field="count" header="目击次数" style="width: 10rem;">
-              <template #body="slotProps">
-                <span class="genre-count">{{ slotProps.data.count }} 次</span>
-              </template>
-            </Column>
-          </DataTable>
-          <div v-if="sightingStore.speciesSightingCounts.length === 0" class="empty-genres">
-            <i class="pi pi-inbox" />
-            <p>暂无目击数据</p>
-          </div>
-        </template>
-      </Card>
-    </section>
   </div>
 </template>
 
@@ -215,24 +181,6 @@ function goToSpecies(speciesId: string) {
   margin: 0;
   font-size: 1.25rem;
   font-weight: 600;
-}
-
-.species-section h2 {
-  margin: 0;
-  font-size: 1.25rem;
-  font-weight: 600;
-}
-
-.species-link {
-  color: var(--p-primary-color);
-  cursor: pointer;
-  font-weight: 500;
-  text-decoration: none;
-  transition: text-decoration 0.15s;
-}
-
-.species-link:hover {
-  text-decoration: underline;
 }
 
 .genre-count {

@@ -28,6 +28,11 @@ const router = createRouter({
       name: 'species-detail',
       component: () => import('@/views/SpeciesDetailView.vue'),
     },
+    {
+      path: '/timeline',
+      name: 'timeline',
+      component: () => import('@/views/TimelineView.vue'),
+    },
   ],
 })
 
