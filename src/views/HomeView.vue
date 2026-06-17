@@ -343,6 +343,44 @@ function formatPrice(price?: number) {
       <template v-if="!isFormMode && selectedAlbum">
         <div class="dialog-content">
           <AlbumCover :title="selectedAlbum.title" class="dialog-cover" />
+
+          <div
+            v-if="isPersonal && activeBorrowRecord"
+            class="borrow-info-card"
+            :class="activeBorrowRecord.status === 'overdue' ? 'overdue' : ''"
+          >
+            <div class="borrow-info-header">
+              <i class="pi pi-book borrow-info-icon" />
+              <span class="borrow-info-title">借阅信息</span>
+              <Tag
+                :value="borrowStatusLabel(activeBorrowRecord.status)"
+                :severity="borrowStatusSeverity(activeBorrowRecord.status)"
+              />
+            </div>
+            <div class="borrow-info-grid">
+              <div>
+                <span class="borrow-info-label">借阅人</span>
+                <p class="borrow-info-value">{{ activeBorrowRecord.borrowerName }}</p>
+              </div>
+              <div>
+                <span class="borrow-info-label">借出日期</span>
+                <p class="borrow-info-value">{{ formatDate(activeBorrowRecord.borrowDate) }}</p>
+              </div>
+              <div class="borrow-info-return">
+                <span class="borrow-info-label">预计归还</span>
+                <p class="borrow-info-value">
+                  {{ formatDate(activeBorrowRecord.expectedReturnDate) }}
+                  <span
+                    v-if="activeBorrowRecord.status === 'overdue'"
+                    class="overdue-days-tip"
+                  >
+                    (已逾期)
+                  </span>
+                </p>
+              </div>
+            </div>
+          </div>
+
           <dl class="detail-list">
             <dt>专辑名</dt>
             <dd>{{ selectedAlbum.title }}</dd>
@@ -369,21 +407,6 @@ function formatPrice(price?: number) {
                 :severity="sourceSeverity(selectedAlbum.source)"
               />
             </dd>
-            <template v-if="isPersonal && activeBorrowRecord">
-              <dt>借阅状态</dt>
-              <dd>
-                <Tag
-                  :value="borrowStatusLabel(activeBorrowRecord.status)"
-                  :severity="borrowStatusSeverity(activeBorrowRecord.status)"
-                />
-              </dd>
-              <dt>借阅人</dt>
-              <dd>{{ activeBorrowRecord.borrowerName }}</dd>
-              <dt>借出日期</dt>
-              <dd>{{ formatDate(activeBorrowRecord.borrowDate) }}</dd>
-              <dt>预计归还</dt>
-              <dd>{{ formatDate(activeBorrowRecord.expectedReturnDate) }}</dd>
-            </template>
           </dl>
         </div>
       </template>
@@ -683,6 +706,72 @@ function formatPrice(price?: number) {
 
 .detail-list dd {
   margin: 0;
+}
+
+.borrow-info-card {
+  border-radius: var(--p-border-radius);
+  border: 1px solid var(--p-orange-200);
+  background: var(--p-orange-50);
+  padding: 0.875rem 1rem;
+}
+
+.borrow-info-card.overdue {
+  border-color: var(--p-red-200);
+  background: var(--p-red-50);
+}
+
+.borrow-info-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.borrow-info-icon {
+  color: var(--p-orange-500);
+  font-size: 1rem;
+}
+
+.borrow-info-card.overdue .borrow-info-icon {
+  color: var(--p-red-500);
+}
+
+.borrow-info-title {
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: var(--p-text-color);
+  flex: 1;
+}
+
+.borrow-info-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.5rem 1rem;
+}
+
+.borrow-info-return {
+  grid-column: span 2;
+}
+
+.borrow-info-label {
+  display: block;
+  font-size: 0.75rem;
+  color: var(--p-text-muted-color);
+  font-weight: 500;
+  margin-bottom: 0.125rem;
+}
+
+.borrow-info-value {
+  margin: 0;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--p-text-color);
+}
+
+.overdue-days-tip {
+  color: var(--p-red-500);
+  font-size: 0.8rem;
+  font-weight: 700;
 }
 
 .form-grid {

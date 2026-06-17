@@ -76,6 +76,11 @@ function statusLabel(status: string) {
   return '已归还'
 }
 
+function rowClass(data: BorrowRecord) {
+  if (data.status === 'overdue') return 'overdue-row'
+  return ''
+}
+
 onMounted(() => {
   store.refreshStatus()
 })
@@ -122,7 +127,7 @@ onMounted(() => {
     <p class="result-count">共 {{ displayRecords.length }} 条在借记录</p>
 
     <div v-if="displayRecords.length > 0" class="records-table">
-      <DataTable :value="displayRecords" :paginator="false" stripedRows>
+      <DataTable :value="displayRecords" :paginator="false" stripedRows :rowClass="rowClass">
         <Column field="albumTitle" header="专辑">
           <template #body="slotProps">
             <div class="album-cell">
@@ -292,6 +297,18 @@ onMounted(() => {
   border-radius: var(--p-border-radius-lg);
   overflow: hidden;
   border: 1px solid var(--p-content-border-color);
+}
+
+.records-table :deep(.overdue-row) {
+  background-color: var(--p-red-50) !important;
+}
+
+.records-table :deep(.overdue-row td) {
+  background-color: var(--p-red-50) !important;
+}
+
+.records-table :deep(.p-datatable-striped .p-datatable-tbody > tr.overdue-row:nth-child(even) td) {
+  background-color: var(--p-red-100) !important;
 }
 
 .album-cell {
