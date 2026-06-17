@@ -20,6 +20,11 @@ export function filterBySource(albums: Album[], filter: FilterType): Album[] {
   return albums
 }
 
+export function filterByStarred(albums: Album[], starredOnly: boolean): Album[] {
+  if (!starredOnly) return albums
+  return albums.filter((a) => a.starred === true)
+}
+
 /**
  * 按风格筛选专辑
  */

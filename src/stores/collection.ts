@@ -88,6 +88,7 @@ export const useCollectionStore = defineStore('collection', {
         purchasePrice: form.purchasePrice ?? 0,
         purchaseDate: form.purchaseDate,
         source: 'personal',
+        starred: false,
       }
       this.personalAlbums.push(album)
       return album
@@ -119,6 +120,13 @@ export const useCollectionStore = defineStore('collection', {
       const index = this.personalAlbums.findIndex((a) => a.id === id)
       if (index === -1) return false
       this.personalAlbums.splice(index, 1)
+      return true
+    },
+
+    toggleStar(id: string): boolean {
+      const album = this.personalAlbums.find((a) => a.id === id)
+      if (!album) return false
+      album.starred = !album.starred
       return true
     },
 

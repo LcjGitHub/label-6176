@@ -3,7 +3,7 @@ import { ref, computed, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useCollectionStore } from '@/stores/collection'
 import { useBorrowStore } from '@/stores/borrow'
-import { filterBySource, filterByGenre, searchAlbums, sortAlbums, extractUniqueGenres } from '@/utils/search'
+import { filterBySource, filterByGenre, filterByStarred, searchAlbums, sortAlbums, extractUniqueGenres } from '@/utils/search'
 import {
   exportCollection,
   parseImportFile,
@@ -47,6 +47,7 @@ const searchQuery = ref('')
 const filterType = ref<FilterType>('all')
 const genreFilter = ref<GenreFilterType>('all')
 const sortOption = ref<SortOptionValue>('default')
+const starredOnly = ref(false)
 
 const filterOptions = [
   { label: '全部', value: 'all' as FilterType },
@@ -90,6 +91,7 @@ const genreOptions = computed(() => {
 const displayAlbums = computed(() => {
   let result = preGenreAlbums.value
   result = filterByGenre(result, genreFilter.value)
+  result = filterByStarred(result, starredOnly.value)
   if (sortOption.value !== 'default') {
     const [field, order] = sortOption.value.split('-') as [string, string]
     result = sortAlbums(result, field as any, order as any)
@@ -300,6 +302,12 @@ function submitForm() {
 /**
  * 确认删除
  */
+function onToggleStar() {
+  if (!selectedAlbum.value || selectedAlbum.value.source !== 'personal') return
+  store.toggleStar(selectedAlbum.value.id)
+  selectedAlbum.value = store.getAlbumById(selectedAlbum.value.id) ?? null
+}
+
 function confirmDelete() {
   if (!selectedAlbum.value || selectedAlbum.value.source !== 'personal') return
 
@@ -524,6 +532,13 @@ function closeImportDialog() {
         option-value="value"
         :allow-empty="false"
       />
+      <Button
+        :label="starredOnly ? '仅星标' : '星标筛选'"
+        :icon="starredOnly ? 'pi pi-star-fill' : 'pi pi-star'"
+        :severity="starredOnly ? 'warning' : 'secondary'"
+        :outlined="!starredOnly"
+        @click="starredOnly = !starredOnly"
+      />
       <div class="toolbar-actions">
         <Button
           label="导出收藏"
@@ -560,7 +575,7 @@ function closeImportDialog() {
             class="album-card"
             @click="openView(album)"
           >
-            <AlbumCover :title="album.title" />
+            <AlbumCover :title="album.title" :starred="album.starred" />
             <div class="album-info">
               <h3 class="album-title">{{ album.title }}</h3>
               <p class="album-artist">{{ album.artist }}</p>
@@ -600,7 +615,7 @@ function closeImportDialog() {
       <!-- 查看模式 -->
       <template v-if="!isFormMode && selectedAlbum">
         <div class="dialog-content">
-          <AlbumCover :title="selectedAlbum.title" class="dialog-cover" />
+          <AlbumCover :title="selectedAlbum.title" :starred="selectedAlbum.starred" class="dialog-cover" />
 
           <div
             v-if="isPersonal && activeBorrowRecord"
@@ -669,6 +684,19 @@ function closeImportDialog() {
                 :severity="sourceSeverity(selectedAlbum.source)"
               />
             </dd>
+            <template v-if="isPersonal">
+              <dt>星标</dt>
+              <dd>
+                <Button
+                  :icon="selectedAlbum.starred ? 'pi pi-star-fill' : 'pi pi-star'"
+                  :label="selectedAlbum.starred ? '已标星' : '标星'"
+                  :severity="selectedAlbum.starred ? 'warning' : 'secondary'"
+                  :outlined="!selectedAlbum.starred"
+                  size="small"
+                  @click="onToggleStar"
+                />
+              </dd>
+            </template>
           </dl>
         </div>
       </template>

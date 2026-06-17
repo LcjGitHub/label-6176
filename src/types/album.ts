@@ -16,6 +16,7 @@ export interface Album {
   purchasePrice?: number
   purchaseDate?: string
   source: AlbumSource
+  starred?: boolean
 }
 
 /**

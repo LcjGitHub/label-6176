@@ -1,6 +1,7 @@
 <script setup lang="ts">
 defineProps<{
   title: string
+  starred?: boolean
 }>()
 </script>
 
@@ -8,6 +9,7 @@ defineProps<{
   <div class="album-cover" :title="title">
     <i class="pi pi-compact-disc cover-icon" />
     <span class="cover-label">VINYL</span>
+    <i v-if="starred" class="pi pi-star-fill star-badge" />
   </div>
 </template>
 
@@ -51,5 +53,15 @@ defineProps<{
   letter-spacing: 0.2em;
   color: #666;
   z-index: 1;
+}
+
+.star-badge {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  font-size: 0.85rem;
+  color: #f59e0b;
+  z-index: 2;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.5));
 }
 </style>
