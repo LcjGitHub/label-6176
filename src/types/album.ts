@@ -84,3 +84,13 @@ export interface CollectionStats {
   totalAmount: number
   genreStats: GenreStat[]
 }
+
+/**
+ * 重复校验结果
+ */
+export interface DuplicateCheckResult {
+  isDuplicate: boolean
+  artist: string
+  catalogNumber: string
+  existingTitle?: string
+}

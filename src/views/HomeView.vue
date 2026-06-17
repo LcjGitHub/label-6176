@@ -12,7 +12,7 @@ import {
   type CollectionExportData,
   type ImportMode,
 } from '@/utils/collectionIO'
-import type { Album, AlbumSource, FilterType, GenreFilterType, PersonalAlbumForm, SortOptionValue } from '@/types/album'
+import type { Album, AlbumSource, FilterType, GenreFilterType, PersonalAlbumForm, SortOptionValue, DuplicateCheckResult } from '@/types/album'
 import type { BorrowForm, BorrowRecord } from '@/types/borrow'
 import DataView from 'primevue/dataview'
 import SelectButton from 'primevue/selectbutton'
@@ -28,6 +28,7 @@ import { useConfirm } from 'primevue/useconfirm'
 import { useToast } from 'primevue/usetoast'
 import RadioButton from 'primevue/radiobutton'
 import AlbumCover from '@/components/AlbumCover.vue'
+import { checkDuplicateAlbum, buildDuplicateMessage } from '@/utils/duplicateCheck'
 
 const store = useCollectionStore()
 const borrowStore = useBorrowStore()
@@ -113,6 +114,8 @@ watch(genreOptions, (options) => {
 const dialogVisible = ref(false)
 const dialogMode = ref<'view' | 'create' | 'edit'>('view')
 const selectedAlbum = ref<Album | null>(null)
+const duplicateDialogVisible = ref(false)
+const duplicateCheckResult = ref<DuplicateCheckResult | null>(null)
 
 const emptyForm = (): PersonalAlbumForm => ({
   title: '',
@@ -288,6 +291,18 @@ function openEdit() {
 function submitForm() {
   if (!isFormValid.value) return
 
+  const excludeId = dialogMode.value === 'edit' && selectedAlbum.value ? selectedAlbum.value.id : undefined
+  const result = checkDuplicateAlbum(form.value, store.existsByArtistAndCatalogNumber, excludeId)
+  if (result.isDuplicate) {
+    duplicateCheckResult.value = result
+    duplicateDialogVisible.value = true
+    return
+  }
+
+  doSave()
+}
+
+function doSave() {
   if (dialogMode.value === 'create') {
     const album = store.addAlbum(form.value)
     selectedAlbum.value = album
@@ -297,6 +312,11 @@ function submitForm() {
     selectedAlbum.value = store.getAlbumById(selectedAlbum.value.id) ?? null
     dialogMode.value = 'view'
   }
+}
+
+function closeDuplicateDialog() {
+  duplicateDialogVisible.value = false
+  duplicateCheckResult.value = null
 }
 
 /**
@@ -862,6 +882,30 @@ function closeImportDialog() {
     <ConfirmDialog />
 
     <Dialog
+      v-model:visible="duplicateDialogVisible"
+      header="重复提示"
+      modal
+      :style="{ width: '26rem' }"
+      :breakpoints="{ '640px': '95vw' }"
+      @close="closeDuplicateDialog"
+    >
+      <div class="duplicate-dialog-content">
+        <i class="pi pi-exclamation-triangle duplicate-warn-icon" />
+        <p class="duplicate-message" v-if="duplicateCheckResult">
+          {{ buildDuplicateMessage(duplicateCheckResult) }}
+        </p>
+      </div>
+      <template #footer>
+        <Button
+          label="返回修改"
+          severity="secondary"
+          outlined
+          @click="closeDuplicateDialog"
+        />
+      </template>
+    </Dialog>
+
+    <Dialog
       v-model:visible="importModeDialogVisible"
       header="导入收藏"
       modal
@@ -1385,5 +1429,25 @@ function closeImportDialog() {
   font-size: 0.85rem;
   color: var(--p-text-muted-color);
   line-height: 1.5;
+}
+
+.duplicate-dialog-content {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.875rem;
+}
+
+.duplicate-warn-icon {
+  font-size: 1.5rem;
+  color: var(--p-orange-500);
+  flex-shrink: 0;
+  margin-top: 0.125rem;
+}
+
+.duplicate-message {
+  margin: 0;
+  font-size: 0.925rem;
+  line-height: 1.6;
+  color: var(--p-text-color);
 }
 </style>
