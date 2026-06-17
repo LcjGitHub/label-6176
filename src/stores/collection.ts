@@ -51,10 +51,10 @@ export const useCollectionStore = defineStore('collection', {
       return this.personalAlbums.reduce((sum, album) => sum + (album.purchasePrice ?? 0), 0)
     },
 
-    /** 按音乐风格分组的数量列表（全部专辑） */
+    /** 按音乐风格分组的数量列表（仅个人收藏） */
     genreStats(): GenreStat[] {
       const map = new Map<string, number>()
-      for (const album of this.allAlbums) {
+      for (const album of this.personalAlbums) {
         if (album.genre) {
           map.set(album.genre, (map.get(album.genre) ?? 0) + 1)
         }
@@ -84,6 +84,7 @@ export const useCollectionStore = defineStore('collection', {
         title: form.title.trim(),
         artist: form.artist.trim(),
         catalogNumber: form.catalogNumber.trim(),
+        genre: form.genre.trim(),
         purchasePrice: form.purchasePrice ?? 0,
         source: 'personal',
       }
@@ -103,6 +104,7 @@ export const useCollectionStore = defineStore('collection', {
         title: form.title.trim(),
         artist: form.artist.trim(),
         catalogNumber: form.catalogNumber.trim(),
+        genre: form.genre.trim(),
         purchasePrice: form.purchasePrice ?? 0,
       }
       return true

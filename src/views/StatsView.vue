@@ -9,6 +9,7 @@ import Tag from 'primevue/tag'
 
 const store = useCollectionStore()
 const router = useRouter()
+const stats = store.collectionStats
 
 function formatPrice(price: number) {
   return `¥${price.toFixed(2)}`
@@ -31,23 +32,27 @@ function goBack() {
 
     <section class="stats-cards">
       <Card class="stat-card">
-        <div class="stat-content">
-          <i class="pi pi-disc stat-icon" />
-          <div class="stat-info">
-            <p class="stat-label">收藏总张数</p>
-            <p class="stat-value">{{ store.personalTotalCount }}</p>
+        <template #content>
+          <div class="stat-content">
+            <i class="pi pi-disc stat-icon" />
+            <div class="stat-info">
+              <p class="stat-label">收藏总张数</p>
+              <p class="stat-value">{{ stats.totalCount }}</p>
+            </div>
           </div>
-        </div>
+        </template>
       </Card>
 
       <Card class="stat-card">
-        <div class="stat-content">
-          <i class="pi pi-wallet stat-icon" />
-          <div class="stat-info">
-            <p class="stat-label">购入总金额</p>
-            <p class="stat-value">{{ formatPrice(store.personalTotalAmount) }}</p>
+        <template #content>
+          <div class="stat-content">
+            <i class="pi pi-wallet stat-icon" />
+            <div class="stat-info">
+              <p class="stat-label">购入总金额</p>
+              <p class="stat-value">{{ formatPrice(stats.totalAmount) }}</p>
+            </div>
           </div>
-        </div>
+        </template>
       </Card>
     </section>
 
@@ -56,22 +61,24 @@ function goBack() {
         <template #title>
           <h2>按音乐风格分组</h2>
         </template>
-        <DataTable :value="store.genreStats" :paginator="false" stripedRows>
-          <Column field="genre" header="音乐风格">
-            <template #body="slotProps">
-              <Tag :value="slotProps.data.genre" severity="primary" />
-            </template>
-          </Column>
-          <Column field="count" header="数量" style="width: 10rem;">
-            <template #body="slotProps">
-              <span class="genre-count">{{ slotProps.data.count }} 张</span>
-            </template>
-          </Column>
-        </DataTable>
-        <div v-if="store.genreStats.length === 0" class="empty-genres">
-          <i class="pi pi-inbox" />
-          <p>暂无风格数据</p>
-        </div>
+        <template #content>
+          <DataTable :value="stats.genreStats" :paginator="false" stripedRows>
+            <Column field="genre" header="音乐风格">
+              <template #body="slotProps">
+                <Tag :value="slotProps.data.genre" severity="primary" />
+              </template>
+            </Column>
+            <Column field="count" header="数量" style="width: 10rem;">
+              <template #body="slotProps">
+                <span class="genre-count">{{ slotProps.data.count }} 张</span>
+              </template>
+            </Column>
+          </DataTable>
+          <div v-if="stats.genreStats.length === 0" class="empty-genres">
+            <i class="pi pi-inbox" />
+            <p>暂无风格数据</p>
+          </div>
+        </template>
       </Card>
     </section>
   </div>

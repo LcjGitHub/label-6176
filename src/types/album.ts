@@ -24,6 +24,7 @@ export interface PersonalAlbumForm {
   title: string
   artist: string
   catalogNumber: string
+  genre: string
   purchasePrice: number | null
 }
 

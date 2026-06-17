@@ -43,6 +43,7 @@ const emptyForm = (): PersonalAlbumForm => ({
   title: '',
   artist: '',
   catalogNumber: '',
+  genre: '',
   purchasePrice: null,
 })
 
@@ -62,6 +63,7 @@ const isFormValid = computed(() => {
     form.value.title.trim() !== '' &&
     form.value.artist.trim() !== '' &&
     form.value.catalogNumber.trim() !== '' &&
+    form.value.genre.trim() !== '' &&
     form.value.purchasePrice !== null &&
     form.value.purchasePrice >= 0
   )
@@ -95,6 +97,7 @@ function openEdit() {
     title: selectedAlbum.value.title,
     artist: selectedAlbum.value.artist,
     catalogNumber: selectedAlbum.value.catalogNumber,
+    genre: selectedAlbum.value.genre ?? '',
     purchasePrice: selectedAlbum.value.purchasePrice ?? 0,
   }
   dialogMode.value = 'edit'
@@ -279,6 +282,10 @@ function formatPrice(price?: number) {
           <div class="field">
             <label for="catalog">编号 <span class="required">*</span></label>
             <InputText id="catalog" v-model="form.catalogNumber" class="w-full" />
+          </div>
+          <div class="field">
+            <label for="genre">风格 <span class="required">*</span></label>
+            <InputText id="genre" v-model="form.genre" placeholder="如：Jazz、Rock、Classical" class="w-full" />
           </div>
           <div class="field">
             <label for="price">购入价 <span class="required">*</span></label>
