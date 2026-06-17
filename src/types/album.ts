@@ -56,6 +56,11 @@ export type SortField = 'title' | 'artist' | 'purchasePrice' | 'year'
 export type SortOrder = 'asc' | 'desc'
 
 /**
+ * 合并排序选项值（字段+方向）
+ */
+export type SortOptionValue = 'default' | `${SortField}-${SortOrder}`
+
+/**
  * 按风格分组的统计项
  */
 export interface GenreStat {
