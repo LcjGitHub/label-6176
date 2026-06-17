@@ -80,7 +80,7 @@ export function sortAlbums(albums: Album[], field: SortField, order: SortOrder):
         const aHas = a.purchasePrice !== undefined && a.purchasePrice !== null
         const bHas = b.purchasePrice !== undefined && b.purchasePrice !== null
         if (aHas !== bHas) {
-          comparison = aHas ? -1 : 1
+          return aHas ? -1 : 1
         } else if (aHas && bHas) {
           comparison = a.purchasePrice! - b.purchasePrice!
         }
